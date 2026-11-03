@@ -1,0 +1,59 @@
+# Session 1 configuration: build the RUL learning problem on C-MAPSS FD001.
+# All paths are relative to the project root (the parent of this configs/ folder).
+
+dataset:
+  subset: FD001                  # FD003 is reserved for later generalisation work
+  raw_dir: data/raw
+  # Expected sizes of the raw FD001 files (checked by the sanity checks).
+  expected_train_engines: 100
+  expected_test_engines: 100
+  expected_train_rows: 20631
+  expected_test_rows: 13096
+
+rul:
+  cap: 125                       # piecewise-linear RUL cap: rul = min(max_cycle - cycle, cap)
+
+split:
+  val_fraction: 0.2              # fraction of TRAINING ENGINES held out for validation
+  seed: 42                       # seed of the engine-level split
+
+features:
+  # 14 informative FD001 sensors. Dropped: sensor_1, 5, 6, 10, 16, 18, 19 (constant or
+  # near-constant in FD001, see the diagnostics) and the 3 operational settings
+  # (FD001 has a single operating condition). The pipeline fails if a selected
+  # feature turns out to be constant on the training engines.
+  selected:
+    - sensor_2
+    - sensor_3
+    - sensor_4
+    - sensor_7
+    - sensor_8
+    - sensor_9
+    - sensor_11
+    - sensor_12
+    - sensor_13
+    - sensor_14
+    - sensor_15
+    - sensor_17
+    - sensor_20
+    - sensor_21
+
+scaler:
+  type: standard                 # standard | minmax; always fitted on training engines only
+
+windows:
+  sequence_length: 30            # window of 30 consecutive cycles of ONE engine, stride 1
+
+diagnostics:
+  constant_std_threshold: 1.0e-8   # std <= this          -> constant
+  near_constant_std_threshold: 0.01  # std < this (raw units) -> near-constant
+  near_constant_max_unique: 2      # <= this many distinct values -> near-constant
+  example_units: [39, 68, 25, 69]  # shortest / median / long / longest FD001 training engines
+  example_sensors: [sensor_2, sensor_4, sensor_7, sensor_11, sensor_12, sensor_15]
+  figure_dpi: 200
+
+outputs:
+  processed_dir: data/processed/fd001            # arrays, split and scaler (git-ignored)
+  figures_dir: reports/figures
+  report_path: reports/session1_validation_report.md
+  diagnostics_csv: reports/session1_channel_diagnostics.csv
