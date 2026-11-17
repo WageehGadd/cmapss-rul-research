@@ -1,0 +1,41 @@
+# Session 2 configuration: benchmark and experiment engine.
+# All paths are relative to the project root unless absolute.
+
+session1:
+  config: configs/session1_fd001.yaml     # frozen Session 1 configuration
+  processed_dir: data/processed/fd001     # Session 1 arrays (checked against its manifest)
+
+benchmark:
+  # Target used to train AND to score every model on every split:
+  #   capped = min(RUL, rul.cap from Session 1)   raw = uncapped RUL
+  target_type: capped
+  seed: 42
+  evaluation_sets: [validation, test]     # test is evaluation-only, never used to fit or tune
+  sensor_set_name: session1_selected_14   # label of the sensor set, as stored in the results table
+
+baselines:
+  - name: mean_rul
+    type: mean_rul                        # constant = mean of the training targets only
+  - name: linear_regression
+    type: linear_regression
+    representation: last_timestep         # [30 cycles, 14 sensors] -> sensor values of the last cycle
+
+timing:
+  warmup_runs: 10            # un-timed calls before measuring
+  timed_runs: 100            # individually timed calls; the median is reported
+  batch_size: 256            # samples per timed call (first N samples of timing_set)
+  latency_unit: ms           # fixed: latency columns are in milliseconds, training time in seconds
+  timing_set: validation
+  hardware_description: auto   # "auto" = captured from the machine, or a free-text note
+
+tracking:
+  tracking_dir: mlruns                    # local MLflow store (SQLite + artifacts), no server needed
+  experiment_name: cmapss_rul_benchmark
+
+outputs:
+  results_csv: results/benchmark_results.csv
+  results_json: results/benchmark_results.json
+  runs_dir: results/runs                  # per-run model, predictions, config and environment
+
+environment:
+  library_names: [numpy, scipy, scikit-learn, pandas, PyYAML, joblib, mlflow]
