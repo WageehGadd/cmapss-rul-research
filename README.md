@@ -123,12 +123,50 @@ artifacts, the Git commit (and whether the working tree had uncommitted changes)
 hardware and library versions. Later models run through `src/experiment.py::run_experiment`
 and `src/evaluation.py::evaluate_model` instead of writing their own metric or logging code.
 
+## Session 3: classical ML and sensor intelligence
+
+Session 3 builds a non-neural benchmark on the Session 1 windows and creates leakage-safe sensor
+rankings and frozen sensor subsets for later experiments. Models run through the Session 2
+engine (`run_experiment` / `evaluate_model`), so they use the same metrics, timing protocol,
+MLflow experiment and results table.
+
+```bash
+python -m src.run_session3 --config configs/session3_classical_ml.yaml   # about 2 minutes
+```
+
+- **Features** (`src/tabular_features.py`): per sensor `last, mean, std, min, max, slope` over the
+  30-cycle window (slope = OLS slope over the cycle index, std = population std), giving
+  14 x 6 = 84 columns in sensor-major order with names `<sensor>__<feature>`.
+- **Models** (`src/classical_models.py`): random forest and histogram gradient boosting
+  (`HistGradientBoostingRegressor`; XGBoost is not installed in this environment).
+- **Selection** (`src/tuning.py`): a 16-candidate grid per family, declared in the config. Candidates
+  are fitted on training windows and scored on validation windows only; within 1% of the best
+  validation RMSE the smallest model is chosen. The test set is used once, for the selected models.
+- **Ranking A**: |Pearson r| between each sensor's last-cycle value and capped RUL, training windows only.
+- **Ranking B**: validation permutation importance (increase in validation RMSE) of the fitted
+  random forest per feature column, summed over each sensor's six features.
+- **Comparison and subsets**: Spearman rank correlation with the largest disagreements; top-k
+  subsets (k = 14, 10, 7, 4, 2) per ranking; random-k controls with fixed seeds.
+
+| Path | Content |
+|---|---|
+| `artifacts/session3/` (versioned) | `sensor_ranking_correlation.csv`, `sensor_ranking_permutation.csv`, `sensor_ranking_comparison.json`, `sensor_subsets_topk.json`, `sensor_subsets_randomk.json`, `permutation_feature_importance.json`, `manifest.json` (SHA-256 of each file) |
+| `results/session3/` (git-ignored) | search tables for both families, `selection.json`, `model_comparison.csv` |
+| `reports/session3_classical_ml_report.md`, `reports/figures/fig6..fig7_*.png` | review report and figures |
+| `results/benchmark_results.*` | Session 2 table, extended with optional `n_parameters`, `model_family`, `feature_set`, `selected_params` columns |
+
+Predictions, rankings and subsets are reproducible; timings vary. Permutation importance on
+individual features understates sensors whose features are mutually redundant (for example
+`last`, `mean`, `min`, `max` of the same sensor).
+
 ## Layout
 
 ```
 configs/   YAML configuration (Session 1 and Session 2)
-src/       Session 1 pipeline; Session 2 metrics, timing, evaluation, baselines, tracking, results
-tests/     pytest suite for the Session 2 benchmark layer
+src/       Session 1 pipeline; Session 2 metrics, timing, evaluation, baselines, tracking, results;
+           Session 3 features, classical models, tuning, sensor rankings
+artifacts/ frozen Session 3 sensor rankings and subsets (version-controlled)
+tests/     pytest suite (Session 2 benchmark layer, Session 3 features, models, rankings)
 data/raw/  NASA C-MAPSS files (not modified)
 reports/   validation report, diagnostics CSV and figures
 results/   benchmark results table and per-run artifacts (git-ignored)

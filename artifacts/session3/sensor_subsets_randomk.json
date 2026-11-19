@@ -1,0 +1,308 @@
+{
+  "session": 3,
+  "config_ref": "configs/session3_classical_ml.yaml",
+  "config_sha256": "7e5ea4e110092ed48adbc4ccb600d34570e4b26aa7fec42930eee16e02b3d140",
+  "seed": 42,
+  "target_type": "capped",
+  "sensors": [
+    "sensor_2",
+    "sensor_3",
+    "sensor_4",
+    "sensor_7",
+    "sensor_8",
+    "sensor_9",
+    "sensor_11",
+    "sensor_12",
+    "sensor_13",
+    "sensor_14",
+    "sensor_15",
+    "sensor_17",
+    "sensor_20",
+    "sensor_21"
+  ],
+  "temporal_features": [
+    "last",
+    "mean",
+    "std",
+    "min",
+    "max",
+    "slope"
+  ],
+  "permutation_source_model": "random_forest",
+  "random_control_seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "sensor_counts": [
+    14,
+    10,
+    7,
+    4,
+    2
+  ],
+  "subsets": {
+    "random_14": {
+      "k": 14,
+      "draws": {
+        "101": [
+          "sensor_2",
+          "sensor_3",
+          "sensor_4",
+          "sensor_7",
+          "sensor_8",
+          "sensor_9",
+          "sensor_11",
+          "sensor_12",
+          "sensor_13",
+          "sensor_14",
+          "sensor_15",
+          "sensor_17",
+          "sensor_20",
+          "sensor_21"
+        ],
+        "102": [
+          "sensor_2",
+          "sensor_3",
+          "sensor_4",
+          "sensor_7",
+          "sensor_8",
+          "sensor_9",
+          "sensor_11",
+          "sensor_12",
+          "sensor_13",
+          "sensor_14",
+          "sensor_15",
+          "sensor_17",
+          "sensor_20",
+          "sensor_21"
+        ],
+        "103": [
+          "sensor_2",
+          "sensor_3",
+          "sensor_4",
+          "sensor_7",
+          "sensor_8",
+          "sensor_9",
+          "sensor_11",
+          "sensor_12",
+          "sensor_13",
+          "sensor_14",
+          "sensor_15",
+          "sensor_17",
+          "sensor_20",
+          "sensor_21"
+        ],
+        "104": [
+          "sensor_2",
+          "sensor_3",
+          "sensor_4",
+          "sensor_7",
+          "sensor_8",
+          "sensor_9",
+          "sensor_11",
+          "sensor_12",
+          "sensor_13",
+          "sensor_14",
+          "sensor_15",
+          "sensor_17",
+          "sensor_20",
+          "sensor_21"
+        ],
+        "105": [
+          "sensor_2",
+          "sensor_3",
+          "sensor_4",
+          "sensor_7",
+          "sensor_8",
+          "sensor_9",
+          "sensor_11",
+          "sensor_12",
+          "sensor_13",
+          "sensor_14",
+          "sensor_15",
+          "sensor_17",
+          "sensor_20",
+          "sensor_21"
+        ]
+      }
+    },
+    "random_10": {
+      "k": 10,
+      "draws": {
+        "101": [
+          "sensor_2",
+          "sensor_3",
+          "sensor_7",
+          "sensor_8",
+          "sensor_9",
+          "sensor_14",
+          "sensor_15",
+          "sensor_17",
+          "sensor_20",
+          "sensor_21"
+        ],
+        "102": [
+          "sensor_2",
+          "sensor_3",
+          "sensor_7",
+          "sensor_9",
+          "sensor_11",
+          "sensor_12",
+          "sensor_13",
+          "sensor_14",
+          "sensor_17",
+          "sensor_20"
+        ],
+        "103": [
+          "sensor_2",
+          "sensor_4",
+          "sensor_8",
+          "sensor_9",
+          "sensor_11",
+          "sensor_13",
+          "sensor_14",
+          "sensor_15",
+          "sensor_17",
+          "sensor_20"
+        ],
+        "104": [
+          "sensor_2",
+          "sensor_3",
+          "sensor_4",
+          "sensor_8",
+          "sensor_9",
+          "sensor_13",
+          "sensor_14",
+          "sensor_15",
+          "sensor_17",
+          "sensor_20"
+        ],
+        "105": [
+          "sensor_7",
+          "sensor_8",
+          "sensor_9",
+          "sensor_11",
+          "sensor_12",
+          "sensor_13",
+          "sensor_14",
+          "sensor_15",
+          "sensor_20",
+          "sensor_21"
+        ]
+      }
+    },
+    "random_7": {
+      "k": 7,
+      "draws": {
+        "101": [
+          "sensor_4",
+          "sensor_8",
+          "sensor_9",
+          "sensor_12",
+          "sensor_14",
+          "sensor_20",
+          "sensor_21"
+        ],
+        "102": [
+          "sensor_2",
+          "sensor_3",
+          "sensor_8",
+          "sensor_9",
+          "sensor_11",
+          "sensor_13",
+          "sensor_14"
+        ],
+        "103": [
+          "sensor_2",
+          "sensor_4",
+          "sensor_7",
+          "sensor_9",
+          "sensor_11",
+          "sensor_13",
+          "sensor_15"
+        ],
+        "104": [
+          "sensor_3",
+          "sensor_4",
+          "sensor_8",
+          "sensor_9",
+          "sensor_11",
+          "sensor_14",
+          "sensor_20"
+        ],
+        "105": [
+          "sensor_3",
+          "sensor_7",
+          "sensor_8",
+          "sensor_9",
+          "sensor_13",
+          "sensor_17",
+          "sensor_20"
+        ]
+      }
+    },
+    "random_4": {
+      "k": 4,
+      "draws": {
+        "101": [
+          "sensor_2",
+          "sensor_12",
+          "sensor_14",
+          "sensor_21"
+        ],
+        "102": [
+          "sensor_3",
+          "sensor_7",
+          "sensor_13",
+          "sensor_20"
+        ],
+        "103": [
+          "sensor_8",
+          "sensor_9",
+          "sensor_15",
+          "sensor_17"
+        ],
+        "104": [
+          "sensor_4",
+          "sensor_12",
+          "sensor_15",
+          "sensor_20"
+        ],
+        "105": [
+          "sensor_3",
+          "sensor_8",
+          "sensor_14",
+          "sensor_20"
+        ]
+      }
+    },
+    "random_2": {
+      "k": 2,
+      "draws": {
+        "101": [
+          "sensor_4",
+          "sensor_17"
+        ],
+        "102": [
+          "sensor_13",
+          "sensor_17"
+        ],
+        "103": [
+          "sensor_4",
+          "sensor_8"
+        ],
+        "104": [
+          "sensor_2",
+          "sensor_4"
+        ],
+        "105": [
+          "sensor_12",
+          "sensor_20"
+        ]
+      }
+    }
+  }
+}

@@ -56,6 +56,8 @@ def build_rows(result, *, sensor_set, sensor_count, seed, git, config_ref, confi
             "session1_config_ref": session1_config_ref,
             "timestamp_utc": timestamp,
         })
+        if result.n_parameters is not None:     # optional extra column, absent for older rows
+            rows[-1]["n_parameters"] = int(result.n_parameters)
     return rows
 
 

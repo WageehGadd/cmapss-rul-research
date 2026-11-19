@@ -49,11 +49,16 @@ def _flat_params(result, data, cfg, model, environment):
     return params
 
 
-def run_experiment(model, data, cfg, tracker, environment):
+def run_experiment(model, data, cfg, tracker, environment, *, extra_columns=None,
+                   config_filename="session2_config.yaml"):
     """Train `model` on the training split, evaluate it, and record the run everywhere.
 
     Returns the EvaluationResult; its run_id is the MLflow run ID and appears in the exported
     results rows.
+
+    extra_columns  optional {column: value} added to every results row (later sessions record
+                   model-specific fields this way; existing rows are unaffected).
+    config_filename  name under which the configuration text is stored in the run folder.
     """
     bench, timing = cfg["benchmark"], cfg["timing"]
     seed = int(bench["seed"])
@@ -77,7 +82,7 @@ def run_experiment(model, data, cfg, tracker, environment):
             metadata={"seed": seed, "sensor_set": bench["sensor_set_name"], "sensors": data.sensors})
 
         np.savez(run_dir / "predictions.npz", **result.predictions)
-        (run_dir / "session2_config.yaml").write_text(cfg.text)
+        (run_dir / config_filename).write_text(cfg.text)
         (run_dir / "environment.json").write_text(json.dumps(environment, indent=2) + "\n")
         (run_dir / "sensors.json").write_text(json.dumps(data.sensors, indent=2) + "\n")
         (run_dir / "model" / "model_config.json").write_text(json.dumps(model.get_config(), indent=2) + "\n")
@@ -89,6 +94,8 @@ def run_experiment(model, data, cfg, tracker, environment):
         rows = build_rows(result, sensor_set=bench["sensor_set_name"], sensor_count=len(data.sensors),
                           seed=seed, git=git, config_ref=cfg.ref, config_sha256=cfg.sha256,
                           session1_config_ref=cfg["session1"]["config"])
+        for row in rows:
+            row.update(extra_columns or {})
         append_results(rows, resolve_path(cfg["outputs"]["results_csv"]),
                        resolve_path(cfg["outputs"]["results_json"]))
     return result

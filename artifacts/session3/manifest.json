@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "session": 3,
+  "config_ref": "configs/session3_classical_ml.yaml",
+  "config_sha256": "7e5ea4e110092ed48adbc4ccb600d34570e4b26aa7fec42930eee16e02b3d140",
+  "seed": 42,
+  "target_type": "capped",
+  "sensors": [
+    "sensor_2",
+    "sensor_3",
+    "sensor_4",
+    "sensor_7",
+    "sensor_8",
+    "sensor_9",
+    "sensor_11",
+    "sensor_12",
+    "sensor_13",
+    "sensor_14",
+    "sensor_15",
+    "sensor_17",
+    "sensor_20",
+    "sensor_21"
+  ],
+  "temporal_features": [
+    "last",
+    "mean",
+    "std",
+    "min",
+    "max",
+    "slope"
+  ],
+  "permutation_source_model": "random_forest",
+  "random_control_seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "sensor_counts": [
+    14,
+    10,
+    7,
+    4,
+    2
+  ],
+  "session1": {
+    "config": "configs/session1_fd001.yaml",
+    "config_sha256": "e9b8891c6ab5fc0f3be39eb00c61c03001428258eada28e14d36ed19595d2f8d",
+    "processed_dir": "data/processed/fd001",
+    "manifest_sha256": "f23513005b0b9beb1f6b247f02c3ef15fcfa6c209a78d98302684d1da1385b27",
+    "split_sha256": "28d83882048d8de46aa6bb7081b63ceb0df8cfdb70278546c607a7aeda55075b",
+    "split_seed": 42,
+    "n_train_engines": 80,
+    "n_validation_engines": 20,
+    "train_units_sha256": "99f4ef3497e936d498eca2686c07a778653668f6437ba370bc84362f6df3757a",
+    "validation_units_sha256": "f826c1e4db30b2af1a2ea4617ec2e43132bf3f8a379e9e8faeee81561121f158",
+    "sensors": [
+      "sensor_2",
+      "sensor_3",
+      "sensor_4",
+      "sensor_7",
+      "sensor_8",
+      "sensor_9",
+      "sensor_11",
+      "sensor_12",
+      "sensor_13",
+      "sensor_14",
+      "sensor_15",
+      "sensor_17",
+      "sensor_20",
+      "sensor_21"
+    ],
+    "sequence_length": 30,
+    "rul_cap": 125,
+    "target_type": "capped"
+  },
+  "permutation_source_run_id": "6a0cdc64a13f417884353b8afb50169d",
+  "git_commit": "70646fb480326796ba4414913adc698349b81029",
+  "git_dirty": true,
+  "files": {
+    "permutation_feature_importance.json": "96e1c66234d254049b3b16e7626c46ac0495e86cb6177f6018a24c8109331c54",
+    "selected_models.json": "3497ff34ff8e4d57af1b6e0e01af425c53dab0ea7757232b66fc3efb275ba9a7",
+    "sensor_ranking_comparison.json": "1a0ffb6b9a8c25e162a25c2a1b3c298e9a3819fbd95a480a0bad599795357ab8",
+    "sensor_ranking_correlation.csv": "2bec226696d64e1fbf6ac071f149bb12c90027255ba2599f6b6902356da8d420",
+    "sensor_ranking_permutation.csv": "831ef0ea61786feb04e539dcc644ec9bd5705df00bd84dc71911b7469b79d770",
+    "sensor_subsets_randomk.json": "b0de86807fefeee570ca8a16ac6f1f0253fb78490e282a8de66118823171186b",
+    "sensor_subsets_topk.json": "681b40f34b7d90db4c0207ae95d0154602936b5ef0d0a588e2ef1afebfb2dd8a"
+  }
+}

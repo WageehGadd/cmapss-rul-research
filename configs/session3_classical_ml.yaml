@@ -1,0 +1,68 @@
+# Session 3 configuration: sensor intelligence + classical ML.
+# Paths are relative to the project root unless absolute.
+
+session1:
+  config: configs/session1_fd001.yaml     # frozen Session 1 configuration
+  processed_dir: data/processed/fd001     # Session 1 arrays (checked against its manifest)
+
+session2:
+  config: configs/session2_benchmark.yaml # frozen benchmark: timing protocol, MLflow store, results table
+
+benchmark:
+  target_type: capped                     # same target as Session 2
+  seed: 42
+  evaluation_sets: [validation, test]     # test is used only for the final, already-selected models
+  sensor_set_name: session1_selected_14
+
+features:
+  # Per sensor, in this order; 14 sensors x 6 = 84 columns. Definitions: src/tabular_features.py
+  temporal: [last, mean, std, min, max, slope]
+
+execution:
+  n_jobs_train: -1          # cores used while fitting (does not change results)
+  n_jobs_predict: 1         # cores used by the random forest at inference (timed protocol)
+
+models:
+  random_forest:
+    name: random_forest
+    search_space:           # 2 x 2 x 2 x 2 = 16 candidates
+      n_estimators: [100, 300]
+      max_depth: [10, 20]
+      min_samples_leaf: [3, 10]
+      max_features: [0.3, 0.6]
+  gradient_boosting:
+    name: gradient_boosting
+    # sklearn HistGradientBoostingRegressor; xgboost is not installed in the project environment.
+    search_space:           # 2 x 2 x 2 x 2 = 16 candidates
+      max_iter: [200, 500]
+      learning_rate: [0.03, 0.1]
+      max_depth: [3, 6]
+      max_features: [0.5, 1.0]
+    fixed:
+      min_samples_leaf: 20
+      l2_regularization: 1.0
+
+selection:                  # validation data only
+  metric: rmse
+  tie_tolerance_rel: 0.01   # candidates within 1% of the best RMSE count as equivalent;
+                            # the smallest model (fewest tree nodes) among them is chosen
+
+ranking:
+  correlation:
+    feature: last           # sensor value at the last cycle of each TRAINING window vs capped RUL
+  permutation:
+    source_model: random_forest   # fitted, selected model whose validation importances are used
+    n_repeats: 10
+    seed: 42
+    aggregation: sum        # sum | mean of the six temporal-feature importances of a sensor
+  top_disagreements: 5
+
+budgets:
+  sensor_counts: [14, 10, 7, 4, 2]
+  random_control_seeds: [101, 102, 103, 104, 105]
+
+outputs:
+  frozen_dir: artifacts/session3          # version-controlled rankings and subsets
+  working_dir: results/session3           # git-ignored search tables and model comparison
+  report: reports/session3_classical_ml_report.md
+  figures_dir: reports/figures

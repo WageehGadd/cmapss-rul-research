@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "session": 3,
+  "config_ref": "configs/session3_classical_ml.yaml",
+  "config_sha256": "7e5ea4e110092ed48adbc4ccb600d34570e4b26aa7fec42930eee16e02b3d140",
+  "seed": 42,
+  "target_type": "capped",
+  "sensors": [
+    "sensor_2",
+    "sensor_3",
+    "sensor_4",
+    "sensor_7",
+    "sensor_8",
+    "sensor_9",
+    "sensor_11",
+    "sensor_12",
+    "sensor_13",
+    "sensor_14",
+    "sensor_15",
+    "sensor_17",
+    "sensor_20",
+    "sensor_21"
+  ],
+  "temporal_features": [
+    "last",
+    "mean",
+    "std",
+    "min",
+    "max",
+    "slope"
+  ],
+  "permutation_source_model": "random_forest",
+  "random_control_seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "sensor_counts": [
+    14,
+    10,
+    7,
+    4,
+    2
+  ],
+  "models": {
+    "random_forest": {
+      "estimator": "sklearn.ensemble.RandomForestRegressor",
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 20,
+        "min_samples_leaf": 10,
+        "max_features": 0.3
+      },
+      "seed": 42,
+      "temporal_features": [
+        "last",
+        "mean",
+        "std",
+        "min",
+        "max",
+        "slope"
+      ],
+      "selected_candidate": 6,
+      "selection": {
+        "metric": "rmse",
+        "tie_tolerance_rel": 0.01,
+        "tiebreak": "fewest n_parameters, then grid order",
+        "best_validation_value": 12.95051830929376,
+        "n_equivalent": 6,
+        "data": "validation only"
+      },
+      "validation_metrics": {
+        "rmse": 12.95051830929376,
+        "mae": 9.55068491221215,
+        "r2": 0.9021643548068702,
+        "nasa_score": 12517.14291887886
+      },
+      "n_parameters": 117656
+    },
+    "gradient_boosting": {
+      "estimator": "sklearn.ensemble.HistGradientBoostingRegressor",
+      "params": {
+        "min_samples_leaf": 20,
+        "l2_regularization": 1.0,
+        "max_iter": 200,
+        "learning_rate": 0.03,
+        "max_depth": 6,
+        "max_features": 1.0
+      },
+      "seed": 42,
+      "temporal_features": [
+        "last",
+        "mean",
+        "std",
+        "min",
+        "max",
+        "slope"
+      ],
+      "selected_candidate": 3,
+      "selection": {
+        "metric": "rmse",
+        "tie_tolerance_rel": 0.01,
+        "tiebreak": "fewest n_parameters, then grid order",
+        "best_validation_value": 12.696938004291296,
+        "n_equivalent": 2,
+        "data": "validation only"
+      },
+      "validation_metrics": {
+        "rmse": 12.791487775815147,
+        "mae": 9.268441092642703,
+        "r2": 0.9045524174635635,
+        "nasa_score": 11787.907280477844
+      },
+      "n_parameters": 12196
+    }
+  }
+}
