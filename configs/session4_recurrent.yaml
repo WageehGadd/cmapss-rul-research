@@ -1,0 +1,73 @@
+# Session 4 configuration: recurrent architecture family (LSTM, GRU).
+# Everything below is declared before any model is trained. Paths are relative to the project root.
+
+session1:
+  config: configs/session1_fd001.yaml     # frozen Session 1 configuration
+  processed_dir: data/processed/fd001     # frozen arrays, split and scaler (never modified here)
+
+session2:
+  config: configs/session2_benchmark.yaml # timing protocol, MLflow store, results table
+
+benchmark:
+  target_type: capped
+  seed: 42
+  evaluation_sets: [validation, test]     # test is evaluated only for the two selected models
+  sensor_set_name: session1_selected_14
+
+training:                                 # one protocol for every LSTM and GRU run
+  optimizer: adam
+  learning_rate: 0.001
+  weight_decay: 0.0
+  batch_size: 256
+  max_epochs: 60
+  early_stopping_patience: 8              # epochs without VALIDATION-loss improvement
+  min_delta: 0.00001                      # improvement must exceed this (loss of RUL / cap)
+  grad_clip: 1.0                          # max gradient L2 norm
+  scheduler:                              # fixed, not searched; reacts to validation loss only
+    type: reduce_on_plateau
+    factor: 0.5
+    patience: 3
+    min_lr: 0.00001
+  target_scale: 125                       # targets are divided by the RUL cap inside the model
+
+execution:
+  # cpu is the default because PyTorch CPU runs are repeatable; mps / cuda / auto are supported
+  # but their kernels are not guaranteed to be bit-reproducible.
+  device: cpu
+
+reference:                                # stability gate that must pass before the ablation
+  family: lstm
+  hidden_size: 64
+  num_layers: 1
+  dropout: 0.0
+  sequence_length: 30
+  tiny_batch_samples: 64                  # the model must overfit this many training windows
+  tiny_batch_epochs: 300
+  tiny_batch_learning_rate: 0.01
+  min_loss_drop: 0.5                      # required relative drop of the training loss
+
+ablation:
+  families: [lstm, gru]
+  # Stage A: full grid at the canonical length, 3 x 2 x 2 = 12 per family (24 runs).
+  stage_a:
+    sequence_length: 30
+    hidden_size: [32, 64, 128]
+    num_layers: [1, 2]
+    dropout: [0.0, 0.2]                   # applied between layers and before the head
+  # Stage B: only the Stage A winner of each family is re-run at the other lengths (2 runs).
+  # L=50 is not possible: some FD001 test engines have only 31 cycles and Session 1 does not pad.
+  stage_b:
+    sequence_lengths: [20]
+
+selection:                                # validation data only
+  metric: rmse
+  tie_tolerance_rel: 0.01                 # within 1% of the best RMSE counts as equivalent
+  # among equivalent candidates: fewest parameters, then shorter sequence length, then grid order
+  stage_b_comparison: common_endpoints    # L=20 vs L=30 compared on windows ending at cycle >= max(L)
+
+outputs:
+  frozen_dir: artifacts/session4          # version-controlled definitions and manifest
+  checkpoint_dir: checkpoints/session4    # git-ignored weights (hash-pinned in the manifest)
+  working_dir: results/session4           # git-ignored ablation tables, histories
+  report: reports/session4_recurrent_report.md
+  figures_dir: reports/figures

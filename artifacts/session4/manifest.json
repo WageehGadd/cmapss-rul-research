@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "session": 4,
+  "config_ref": "configs/session4_recurrent.yaml",
+  "config_sha256": "b8d4f4d656ff7e0dd8504dd10b86d4dc3ae5fe2f09f1e562b9acf54a9797fa49",
+  "seed": 42,
+  "target_type": "capped",
+  "device": "cpu",
+  "torch_version": "2.15.0",
+  "sequence_lengths_tested": [
+    20,
+    30
+  ],
+  "session1": {
+    "config": "configs/session1_fd001.yaml",
+    "config_sha256": "e9b8891c6ab5fc0f3be39eb00c61c03001428258eada28e14d36ed19595d2f8d",
+    "processed_dir": "data/processed/fd001",
+    "manifest_sha256": "f23513005b0b9beb1f6b247f02c3ef15fcfa6c209a78d98302684d1da1385b27",
+    "split_sha256": "28d83882048d8de46aa6bb7081b63ceb0df8cfdb70278546c607a7aeda55075b",
+    "split_seed": 42,
+    "n_train_engines": 80,
+    "n_validation_engines": 20,
+    "train_units_sha256": "99f4ef3497e936d498eca2686c07a778653668f6437ba370bc84362f6df3757a",
+    "validation_units_sha256": "f826c1e4db30b2af1a2ea4617ec2e43132bf3f8a379e9e8faeee81561121f158",
+    "sensors": [
+      "sensor_2",
+      "sensor_3",
+      "sensor_4",
+      "sensor_7",
+      "sensor_8",
+      "sensor_9",
+      "sensor_11",
+      "sensor_12",
+      "sensor_13",
+      "sensor_14",
+      "sensor_15",
+      "sensor_17",
+      "sensor_20",
+      "sensor_21"
+    ],
+    "sequence_length": 30,
+    "rul_cap": 125,
+    "target_type": "capped"
+  },
+  "session3_manifest_sha256": "7dfd7a9355c321e3f4fbb74ebb09a86600936e5b2d87337d1c31148ce8d9f8c9",
+  "files": {
+    "selected_lstm.json": "893e97662483ccec650b6c8fd5f2940c12bcc159d5c5042356adaceb7611e951",
+    "selected_gru.json": "36fc5ce2b1b2a4661904b0596befde1bdced407e23489f3d9660ec6765ae5c78"
+  },
+  "checkpoints": {
+    "lstm": {
+      "path": "checkpoints/session4/selected_lstm.pt",
+      "file_sha256": "c104656a35b39858293d7d5440a30d81b17fc1960db6e529f3198ba27ea0f70f",
+      "weights_sha256": "00b9f41dd89d0bebec9cec15210b15e760d59dc6bd357909827141ba8f252d52"
+    },
+    "gru": {
+      "path": "checkpoints/session4/selected_gru.pt",
+      "file_sha256": "620b0398a54957bf0848e978e21e91945c3363641a2f3cf81b33cc995e650094",
+      "weights_sha256": "3eb9547d52ab1583a146d7e3805005a03fd9dbf933b910b5c09a57c716c5d213"
+    }
+  },
+  "source_run_ids": {
+    "lstm": "e3698d00cab242e6b8c4630eec3f9231",
+    "gru": "5662ba784e9d4e13b234f2cb87735b2a"
+  },
+  "git_commit": "bb7dee7f2aa5467cd3f7ef0a1bf7b9cddaaf3817",
+  "git_dirty": true
+}

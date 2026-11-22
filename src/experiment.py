@@ -56,8 +56,9 @@ def run_experiment(model, data, cfg, tracker, environment, *, extra_columns=None
     Returns the EvaluationResult; its run_id is the MLflow run ID and appears in the exported
     results rows.
 
-    extra_columns  optional {column: value} added to every results row (later sessions record
-                   model-specific fields this way; existing rows are unaffected).
+    extra_columns  optional {column: value} added to every results row, or a function of the
+                   finished EvaluationResult returning such a dict (for values known only after
+                   training). Existing rows are unaffected.
     config_filename  name under which the configuration text is stored in the run folder.
     """
     bench, timing = cfg["benchmark"], cfg["timing"]
@@ -94,8 +95,9 @@ def run_experiment(model, data, cfg, tracker, environment, *, extra_columns=None
         rows = build_rows(result, sensor_set=bench["sensor_set_name"], sensor_count=len(data.sensors),
                           seed=seed, git=git, config_ref=cfg.ref, config_sha256=cfg.sha256,
                           session1_config_ref=cfg["session1"]["config"])
+        extra = extra_columns(result) if callable(extra_columns) else (extra_columns or {})
         for row in rows:
-            row.update(extra_columns or {})
+            row.update(extra)
         append_results(rows, resolve_path(cfg["outputs"]["results_csv"]),
                        resolve_path(cfg["outputs"]["results_json"]))
     return result

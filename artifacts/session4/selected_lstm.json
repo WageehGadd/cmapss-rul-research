@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "family": "lstm",
+  "name": "lstm",
+  "architecture": {
+    "cell": "lstm",
+    "hidden_size": 32,
+    "num_layers": 2,
+    "dropout": 0.0,
+    "sequence_length": 30,
+    "n_sensors": 14,
+    "head": "linear(hidden, 1) on the last time step",
+    "n_parameters": 14625
+  },
+  "training": {
+    "optimizer": "adam",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "batch_size": 256,
+    "max_epochs": 60,
+    "early_stopping_patience": 8,
+    "min_delta": 1e-05,
+    "grad_clip": 1.0,
+    "scheduler": {
+      "type": "reduce_on_plateau",
+      "factor": 0.5,
+      "patience": 3,
+      "min_lr": 1e-05
+    },
+    "target_scale": 125,
+    "seed": 42,
+    "device": "cpu"
+  },
+  "selection": {
+    "data": "validation only",
+    "metric": "rmse",
+    "tie_tolerance_rel": 0.01,
+    "tiebreak": "fewest parameters, then shorter sequence length, then grid order",
+    "stage_a_rule": {
+      "metric": "rmse",
+      "best_validation_value": 12.990028477338315,
+      "tie_tolerance_rel": 0.01,
+      "n_equivalent": 3,
+      "tiebreak": "fewest n_parameters, then grid order"
+    },
+    "stage_b_rule": {
+      "metric": "rmse",
+      "best_validation_value": 12.990028477338315,
+      "tie_tolerance_rel": 0.01,
+      "n_equivalent": 1,
+      "tiebreak": "fewest n_parameters, then grid order"
+    },
+    "stage_b_common_endpoint_rows": [
+      {
+        "sequence_length": 20,
+        "n_common_windows": 3272,
+        "rmse": 15.273696486737393,
+        "mae": 11.03512020427893,
+        "r2": 0.8639147280993784,
+        "nasa_score": 14753.229007626791
+      },
+      {
+        "sequence_length": 30,
+        "n_common_windows": 3272,
+        "rmse": 12.990028477338315,
+        "mae": 9.652314315832387,
+        "r2": 0.901566479225943,
+        "nasa_score": 9220.731331669183
+      }
+    ]
+  },
+  "training_outcome": {
+    "best_epoch": 12,
+    "epochs_run": 20,
+    "stop_reason": "early_stopping",
+    "best_val_loss": 0.010799413508209593
+  },
+  "validation_metrics": {
+    "rmse": 12.990028477338315,
+    "mae": 9.652314315832387,
+    "r2": 0.901566479225943,
+    "nasa_score": 9220.731331669183
+  },
+  "checkpoint": {
+    "path": "checkpoints/session4/selected_lstm.pt",
+    "file_sha256": "c104656a35b39858293d7d5440a30d81b17fc1960db6e529f3198ba27ea0f70f",
+    "weights_sha256": "00b9f41dd89d0bebec9cec15210b15e760d59dc6bd357909827141ba8f252d52"
+  },
+  "retrain_matches_ablation_weights": true
+}
