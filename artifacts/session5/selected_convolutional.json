@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "final_family": "tcn",
+  "definition_file": "selected_tcn.json",
+  "architecture": {
+    "channels": 32,
+    "kernel_size": 3,
+    "receptive_field": 61,
+    "n_parameters": 23617,
+    "sequence_length": 30,
+    "n_sensors": 14,
+    "dilations": [
+      1,
+      2,
+      4,
+      8
+    ]
+  },
+  "selection": {
+    "data": "validation only",
+    "metric": "rmse",
+    "best_validation_value": 14.636878792816178,
+    "tie_tolerance_rel": 0.01,
+    "n_candidates": 2,
+    "n_equivalent": 1,
+    "tiebreak": "fewest parameters, then lower inference latency, then grid order",
+    "decided_by": "validation metric"
+  },
+  "representatives_validation": {
+    "cnn": {
+      "run_name": "cnn_c32_k5_d3",
+      "n_parameters": 12609,
+      "rmse": 17.45117280885117,
+      "mae": 12.932180271187939,
+      "r2": 0.8223472023237635,
+      "nasa_score": 33963.166301705714
+    },
+    "tcn": {
+      "run_name": "tcn_c32_k3_dil1-2-4-8",
+      "n_parameters": 23617,
+      "rmse": 14.636878792816178,
+      "mae": 11.177658849511943,
+      "r2": 0.8750259725089773,
+      "nasa_score": 12235.862628099727
+    }
+  },
+  "checkpoint": {
+    "path": "checkpoints/session5/selected_tcn.pt",
+    "file_sha256": "4b18866729b2c806c906ce920054b3396d81cd0e0f5ba6c3cb492471fe0f82ad",
+    "weights_sha256": "6e55d72f9f27293f40adcf26e029373efbe1493f3e5f117484a18a42bb262eb2"
+  },
+  "retrain_matches_candidate_weights": true,
+  "intended_use": "representative convolutional architecture for Session 7"
+}

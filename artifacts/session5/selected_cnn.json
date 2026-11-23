@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "family": "cnn",
+  "architecture": {
+    "channels": 32,
+    "kernel_size": 5,
+    "depth": 3,
+    "dropout": 0.1,
+    "sequence_length": 30,
+    "n_sensors": 14,
+    "receptive_field": 13,
+    "readout": "last time step",
+    "n_parameters": 12609
+  },
+  "training": {
+    "optimizer": "adam",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "batch_size": 256,
+    "max_epochs": 60,
+    "early_stopping_patience": 8,
+    "min_delta": 1e-05,
+    "grad_clip": 1.0,
+    "scheduler": {
+      "type": "reduce_on_plateau",
+      "factor": 0.5,
+      "patience": 3,
+      "min_lr": 1e-05
+    },
+    "target_scale": 125,
+    "seed": 42,
+    "device": "cpu"
+  },
+  "selection": {
+    "data": "validation only",
+    "metric": "rmse",
+    "best_validation_value": 17.45117280885117,
+    "tie_tolerance_rel": 0.01,
+    "n_candidates": 8,
+    "n_equivalent": 1,
+    "tiebreak": "fewest parameters, then lower inference latency, then grid order",
+    "decided_by": "validation metric"
+  },
+  "training_outcome": {
+    "best_epoch": 10,
+    "epochs_run": 18,
+    "stop_reason": "early_stopping",
+    "best_val_loss": 0.019490778305019028
+  },
+  "validation_metrics": {
+    "rmse": 17.45117280885117,
+    "mae": 12.932180271187939,
+    "r2": 0.8223472023237635,
+    "nasa_score": 33963.166301705714
+  },
+  "checkpoint": {
+    "path": "checkpoints/session5/selected_cnn.pt",
+    "file_sha256": "20f618a6c047ce75fc8241d44bccb253b9fe097a2f9a3ffe43e3d331c7b174db",
+    "weights_sha256": "c28cda985a9f399194ce556fd08c08d8379000ab2b37238bb19588e1b99d093a"
+  }
+}

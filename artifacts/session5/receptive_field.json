@@ -1,0 +1,83 @@
+{
+  "sequence_length": 30,
+  "formulas": {
+    "tcn": "1 + 2 * (kernel_size - 1) * sum(dilations)",
+    "cnn": "1 + depth * (kernel_size - 1)"
+  },
+  "configurations": [
+    {
+      "family": "cnn",
+      "kernel_size": 3,
+      "depth_or_dilations": 2,
+      "receptive_field": 5,
+      "vs_window": "within window"
+    },
+    {
+      "family": "cnn",
+      "kernel_size": 3,
+      "depth_or_dilations": 3,
+      "receptive_field": 7,
+      "vs_window": "within window"
+    },
+    {
+      "family": "cnn",
+      "kernel_size": 5,
+      "depth_or_dilations": 2,
+      "receptive_field": 9,
+      "vs_window": "within window"
+    },
+    {
+      "family": "cnn",
+      "kernel_size": 5,
+      "depth_or_dilations": 3,
+      "receptive_field": 13,
+      "vs_window": "within window"
+    },
+    {
+      "family": "tcn",
+      "kernel_size": 3,
+      "depth_or_dilations": [
+        1,
+        2,
+        4
+      ],
+      "receptive_field": 29,
+      "vs_window": "within window"
+    },
+    {
+      "family": "tcn",
+      "kernel_size": 3,
+      "depth_or_dilations": [
+        1,
+        2,
+        4,
+        8
+      ],
+      "receptive_field": 61,
+      "vs_window": "exceeds window (extra positions are zero padding)"
+    },
+    {
+      "family": "tcn",
+      "kernel_size": 5,
+      "depth_or_dilations": [
+        1,
+        2,
+        4
+      ],
+      "receptive_field": 57,
+      "vs_window": "exceeds window (extra positions are zero padding)"
+    },
+    {
+      "family": "tcn",
+      "kernel_size": 5,
+      "depth_or_dilations": [
+        1,
+        2,
+        4,
+        8
+      ],
+      "receptive_field": 121,
+      "vs_window": "exceeds window (extra positions are zero padding)"
+    }
+  ]
+}
