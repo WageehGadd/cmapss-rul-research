@@ -1,0 +1,71 @@
+# Session 5 configuration: temporal CNN and TCN architecture family.
+# Everything below is declared before any model is trained. Paths are relative to the project root.
+
+session1:
+  config: configs/session1_fd001.yaml     # frozen Session 1 configuration
+  processed_dir: data/processed/fd001     # frozen arrays, split and scaler (never modified here)
+
+session2:
+  config: configs/session2_benchmark.yaml # timing protocol (warm-up, timed runs, batch), MLflow store, results table
+
+benchmark:
+  target_type: capped
+  seed: 42                                # same seed as the recurrent family
+  evaluation_sets: [validation, test]     # test is evaluated only for the final selected architecture
+  sensor_set_name: session1_selected_14
+
+input:
+  n_sensors: 14                           # all Session 1 sensors; checked against the loaded data
+  sequence_length: 30                     # canonical Session 1 windows [B, 30, 14]
+
+training:                                 # identical to the Session 4 recurrent protocol (checked at start)
+  optimizer: adam
+  learning_rate: 0.001
+  weight_decay: 0.0
+  batch_size: 256
+  max_epochs: 60
+  early_stopping_patience: 8
+  min_delta: 0.00001
+  grad_clip: 1.0
+  scheduler:
+    type: reduce_on_plateau
+    factor: 0.5
+    patience: 3
+    min_lr: 0.00001
+  target_scale: 125                       # targets are divided by the RUL cap inside the model
+
+protocol_reference:
+  config: configs/session4_recurrent.yaml
+  require_identical_training: true        # the run stops if the training protocol differs
+
+execution:
+  device: cpu                             # repeatable on CPU; mps / cuda / auto are supported
+
+architecture:
+  dropout: 0.1                            # one fixed value for every CNN and TCN candidate
+  cnn:                                    # plain 1D-CNN: unpadded Conv1d stack, stride 1, last-step readout
+    channels: [32, 64]
+    kernel_size: [3, 5]
+    depth: [2, 3]                         # 2 x 2 x 2 = 8 candidates
+  tcn:                                    # residual causal TCN, two convolutions per block, last-step readout
+    channels: [32, 64]
+    kernel_size: [3, 5]
+    dilations: [[1, 2, 4], [1, 2, 4, 8]]  # 2 x 2 x 2 = 8 candidates
+
+stability_gate:                           # each family must overfit this many training windows before the study
+  samples: 64
+  epochs: 300
+  learning_rate: 0.01
+  min_loss_drop: 0.5                      # required relative drop of the training loss
+
+selection:                                # validation data only; applied per family, then between the two
+  metric: rmse
+  tie_tolerance_rel: 0.01                 # within 1% of the best RMSE counts as equivalent
+  # among equivalent candidates: fewest parameters, then lower inference latency, then grid order
+
+outputs:
+  frozen_dir: artifacts/session5          # version-controlled definitions and manifest
+  checkpoint_dir: checkpoints/session5    # git-ignored weights (hash-pinned in the manifest)
+  working_dir: results/session5           # git-ignored candidate table, histories, candidate checkpoints
+  report: reports/session5_convolutional_report.md
+  figures_dir: reports/figures
