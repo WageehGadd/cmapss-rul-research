@@ -60,9 +60,9 @@
     }
   },
   "source_run_ids": {
-    "lstm": "e3698d00cab242e6b8c4630eec3f9231",
-    "gru": "5662ba784e9d4e13b234f2cb87735b2a"
+    "lstm": "46f12d215adf4baab68f623608263577",
+    "gru": "c1933fbc987c4312bca9239f53788c8d"
   },
-  "git_commit": "bb7dee7f2aa5467cd3f7ef0a1bf7b9cddaaf3817",
-  "git_dirty": true
+  "git_commit": "e8140f782c1ceb23b1550edea81d9011eec5a779",
+  "git_dirty": false
 }
