@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "family": "transformer",
+  "architecture": {
+    "d_model": 64,
+    "num_heads": 4,
+    "num_layers": 2,
+    "ff_multiplier": 2,
+    "ff_dim": 128,
+    "dropout": 0.1,
+    "pooling": "last",
+    "activation": "relu",
+    "positional_encoding": "sinusoidal",
+    "normalization": "pre-norm layers + final LayerNorm",
+    "attention_mask": "none",
+    "sequence_length": 30,
+    "n_sensors": 14
+  },
+  "n_parameters": 68097,
+  "training": {
+    "optimizer": "adam",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "batch_size": 256,
+    "max_epochs": 60,
+    "early_stopping_patience": 8,
+    "min_delta": 1e-05,
+    "grad_clip": 1.0,
+    "scheduler": {
+      "type": "reduce_on_plateau",
+      "factor": 0.5,
+      "patience": 3,
+      "min_lr": 1e-05
+    },
+    "target_scale": 125,
+    "seed": 42,
+    "device": "cpu"
+  },
+  "selection": {
+    "data": "validation only",
+    "stage_a": {
+      "metric": "rmse",
+      "best_validation_value": 12.320710742477193,
+      "tie_tolerance_rel": 0.01,
+      "n_candidates": 8,
+      "n_equivalent": 1,
+      "tiebreak": "fewest parameters, then lower inference latency, then grid order",
+      "decided_by": "validation metric"
+    },
+    "pooling": {
+      "metric": "rmse",
+      "best_validation_value": 12.320710742477193,
+      "tie_tolerance_rel": 0.01,
+      "n_candidates": 2,
+      "n_equivalent": 1,
+      "tiebreak": "fewest parameters, then lower inference latency, then grid order",
+      "decided_by": "validation metric"
+    },
+    "tiebreak": "fewest parameters, then lower inference latency, then declared order"
+  },
+  "training_outcome": {
+    "best_epoch": 12,
+    "epochs_run": 20,
+    "stop_reason": "early_stopping",
+    "best_val_loss": 0.009715194369878047
+  },
+  "validation_metrics": {
+    "rmse": 12.320710742477193,
+    "mae": 8.315145456804814,
+    "r2": 0.9114488233942796,
+    "nasa_score": 10653.63616174689
+  },
+  "checkpoint": {
+    "path": "checkpoints/session6/selected_transformer.pt",
+    "file_sha256": "4facf421dbd74df8719f7bf1fdc817a7e0b4c96f856ce9b9fdcadf5f5678b66e",
+    "weights_sha256": "8f267815fdc86be14058cca9ae93bcfd7e6b552ac0a2ff07cff8937926aff732"
+  },
+  "retrain_matches_candidate_weights": true,
+  "session7": {
+    "rebuild_with": "src.transformer_models.build_from_definition(definition, n_sensors=k)",
+    "varies_with_sensor_count": [
+      "input projection"
+    ],
+    "frozen": [
+      "d_model",
+      "num_heads",
+      "num_layers",
+      "ff_multiplier",
+      "dropout",
+      "pooling",
+      "activation",
+      "positional_encoding",
+      "training"
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "architecture": {
+    "d_model": 64,
+    "num_heads": 4,
+    "num_layers": 2
+  },
+  "rule": {
+    "metric": "rmse",
+    "best_validation_value": 12.320710742477193,
+    "tie_tolerance_rel": 0.01,
+    "n_candidates": 2,
+    "n_equivalent": 1,
+    "tiebreak": "fewest parameters, then lower inference latency, then grid order",
+    "decided_by": "validation metric"
+  },
+  "selected_pooling": "last",
+  "results": [
+    {
+      "pooling": "last",
+      "run_name": "tf_d64_h4_l2_last",
+      "n_parameters": 68097,
+      "best_epoch": 12,
+      "epochs_run": 20,
+      "rmse": 12.320710742477193,
+      "mae": 8.315145456804814,
+      "r2": 0.9114488233942796,
+      "nasa_score": 10653.63616174689,
+      "weights_sha256": "8f267815fdc86be14058cca9ae93bcfd7e6b552ac0a2ff07cff8937926aff732"
+    },
+    {
+      "pooling": "mean",
+      "run_name": "tf_d64_h4_l2_mean",
+      "n_parameters": 68097,
+      "best_epoch": 4,
+      "epochs_run": 12,
+      "rmse": 13.318349940558438,
+      "mae": 10.289120064635618,
+      "r2": 0.8965278063045137,
+      "nasa_score": 10693.474114376362,
+      "weights_sha256": "1f0a791cb76c49719900b0a31c7b89b15f9ea94267320b5acba97beb2e85739d"
+    }
+  ]
+}
