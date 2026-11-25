@@ -1,0 +1,79 @@
+# Session 6 configuration: compact Transformer for RUL regression.
+# Everything below is declared before the architecture study. Paths are relative to the project root.
+
+session1:
+  config: configs/session1_fd001.yaml     # frozen Session 1 configuration
+  processed_dir: data/processed/fd001     # frozen arrays, split and scaler (never modified here)
+
+session2:
+  config: configs/session2_benchmark.yaml # timing protocol, MLflow store, results table
+
+benchmark:
+  target_type: capped
+  seed: 42
+  evaluation_sets: [validation, test]     # test is evaluated only for the final selected Transformer
+  sensor_set_name: session1_selected_14
+
+input:
+  n_sensors: 14                           # checked against the loaded data; the model does not hard-code it
+  sequence_length: 30
+
+training:                                 # identical to the Session 4 / 5 protocol (checked at start)
+  optimizer: adam
+  learning_rate: 0.001
+  weight_decay: 0.0
+  batch_size: 256
+  max_epochs: 60
+  early_stopping_patience: 8
+  min_delta: 0.00001
+  grad_clip: 1.0
+  scheduler:
+    type: reduce_on_plateau
+    factor: 0.5
+    patience: 3
+    min_lr: 0.00001
+  target_scale: 125
+
+protocol_reference:
+  config: configs/session4_recurrent.yaml
+  require_identical_training: true        # training section, seed and device must match
+
+execution:
+  device: cpu
+
+model:                                    # fixed for every candidate
+  positional_encoding: sinusoidal         # deterministic sine / cosine over the cycle index
+  attention_mask: none                    # sequence-to-one over a fully observed window (see the module docstring)
+  normalization: pre_norm                 # pre-norm encoder layers followed by a final LayerNorm
+  activation: relu
+  ff_multiplier: 2                        # feed-forward width = 2 x d_model
+  dropout: 0.1
+
+study:
+  stage_a:                                # 2 x 2 x 2 = 8 candidates, last pooling
+    d_model: [32, 64]
+    num_heads: [2, 4]
+    num_layers: [1, 2]
+    pooling: last
+  stage_b:                                # only the Stage A leader is re-run with the other pooling(s)
+    pooling: [last, mean]                 # the Stage A run is reused for its own pooling
+  sensor_aware_variant: false             # optional roadmap extension, not part of this study
+
+stability_gate:
+  samples: 64
+  epochs: 300
+  learning_rate: 0.01
+  min_loss_drop: 0.5
+  session7_sensor_counts: [14, 10, 7, 4, 2]
+
+selection:                                # validation data only, same rule for Stage A and pooling
+  metric: rmse
+  tie_tolerance_rel: 0.01
+  # equivalent within 1% -> fewest parameters, then lower inference latency, then declared order
+
+outputs:
+  frozen_dir: artifacts/session6
+  checkpoint_dir: checkpoints/session6
+  working_dir: results/session6
+  report: reports/session6_transformer_report.md
+  figures_dir: reports/figures
