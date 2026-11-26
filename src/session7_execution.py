@@ -28,9 +28,10 @@ from .session7_models import build_condition_model
 from .session7_plan import sha256_file, sha256_json, subset_data
 from .tracking import MlflowTracker, mlflow
 
-FINGERPRINT_MODULES = ("benchmark_config", "benchmark_data", "sequence_data", "classical_models", "convolutional_models", "evaluation", "experiment",
-                       "metrics", "recurrent_models", "results", "session7_execution", "session7_models",
-                       "session7_plan", "tabular_features", "timing", "tracking", "transformer_models")
+FINGERPRINT_MODULES = ("benchmark_config", "benchmark_data", "checks", "classical_models", "convolutional_models",
+                       "data_loading", "evaluation", "experiment", "metrics", "recurrent_models", "results", "rul",
+                       "scaling", "sequence_data", "session7_execution", "session7_models", "session7_plan",
+                       "splitting", "tabular_features", "timing", "tracking", "transformer_models", "windows")
 
 
 # every source file that produces training results, checks them or writes the research outputs

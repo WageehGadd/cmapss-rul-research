@@ -12,6 +12,9 @@ STAGE: validate  check the configuration, frozen sources and data (writes nothin
        summarize build the master and aggregate tables from the records
        report    figures, report and artifacts/session7
        all       plan, run, summarize, report (default)
+Report and publish refuse unless the full-sensor reproducibility gate passed. A writing stage also
+refuses when the configured outputs belong to another experiment or execution, or when git cannot
+report the source state.
 The configured report, figures and artifacts are written only when every record is complete and
 valid; otherwise they go to <working_dir>/incomplete_outputs. Stages that write refuse records
 produced by another source state.
@@ -37,7 +40,8 @@ from .session7_analysis import (OK, degradation_rows, load_predictions, master_r
                                 robustness_rows)
 from .session7_execution import (Executor, atomic_write_json, code_fingerprint, execution_fingerprint, read_record,
                                  reproducibility_gate, source_hashes)
-from .session7_integrity import RunStore, execution_lock, provenance_mismatch, validate_record
+from .session7_integrity import (RESOURCE_METRICS, UNKNOWN, RunStore, execution_lock, git_state,
+                                 provenance_mismatch, validate_record)
 from .session7_outputs import (FIGURES, conclusions, figure_heatmap, figure_pareto, figure_per_engine,
                                figure_ranked_vs_random, figure_rmse_vs_budget, write_package, write_report)
 from .session7_plan import (build_plan, load_frozen_sources, load_session7_config, load_train_validation, sha256_file)
@@ -84,6 +88,7 @@ class Session:
         env = capture_environment(PROJECT_ROOT, [*self.bench["environment"]["library_names"], "torch"],
                                   {"session7_config": self.config_ref})
         env["torch"] = {"version": torch.__version__, "threads": torch.get_num_threads(), "device": "cpu"}
+        env["git"] = git_state(PROJECT_ROOT)             # never reports clean when git cannot answer
         return env
 
     def write_plan(self):
@@ -111,7 +116,7 @@ class Session:
 
     def validated_records(self):
         """Records for aggregation: a 'completed' record whose evidence fails a check is relabelled
-        'invalid' in memory (the stored file is not changed) and loses its metrics."""
+        'invalid' in memory (the stored file is not changed) and loses its metrics and resource values."""
         store = RunStore(resolve_path(self.bench["tracking"]["tracking_dir"]))
         experiment = self.cfg["execution"]["experiment_name"]
         records, problems = self.records(), {}
@@ -122,7 +127,8 @@ class Session:
             valid, reason = validate_record(c, record, self.data.y["validation"], store, experiment, sha256_file)
             if not valid:
                 problems[c["experiment_id"]] = reason
-                records[c["experiment_id"]] = {k: v for k, v in record.items() if k != "metrics"} | {
+                records[c["experiment_id"]] = {k: v for k, v in record.items()
+                                               if k != "metrics" and k not in RESOURCE_METRICS} | {
                     "status": "invalid", "error": reason}
         return records, problems
 
@@ -260,13 +266,68 @@ def output_paths(session, root=None):
             "artifacts": root / "artifacts"}
 
 
+def _read_manifest(artifacts):
+    """The manifest of a published output folder, or None when the folder holds nothing."""
+    path = artifacts / "manifest.json"
+    manifest = read_record(path)
+    if path.exists() and not (isinstance(manifest, dict) and isinstance(manifest.get("conditions"), dict)):
+        raise RuntimeError(f"{path} is unreadable; move the outputs of that execution before writing new ones")
+    return manifest
+
+
+def _require_compatible_outputs(session):
+    """Checked before any writing stage: the configured destinations are empty, or they hold the
+    outputs of this very experiment and execution."""
+    paths, plan = output_paths(session), session.plan
+    existing = [p for p in (paths["report"], *(paths["figures"] / name for name in FIGURES)) if p.exists()]
+    if paths["artifacts"].is_dir():
+        existing += list(paths["artifacts"].iterdir())
+    if not existing:
+        return
+    manifest = _read_manifest(paths["artifacts"])
+    if manifest is None:
+        raise RuntimeError(f"outputs exist without a manifest ({existing[0]}); they are never replaced")
+    expected = {"session": 7, "config_sha256": sha256_file(session.config_path),
+                **{k: plan[k] for k in ("data", "training_protocol", "source_hashes")}}
+    different = [k for k, v in expected.items() if manifest.get(k) != json.loads(json.dumps(v))]
+    if set(manifest["conditions"]) != {c["experiment_id"] for c in plan["conditions"]}:
+        different.append("conditions")
+    if different:
+        raise RuntimeError(f"{paths['artifacts']} belongs to a different experiment ({', '.join(different)} differ); "
+                           "its outputs are never replaced")
+    records = session.records()
+    for key, old in manifest["conditions"].items():
+        run_id = old.get("mlflow_run_id")
+        if run_id and records.get(key, {}).get("mlflow_run_id") != run_id:
+            raise RuntimeError(f"{paths['artifacts']} holds the outputs of another execution; move it before "
+                               "writing new outputs")
+
+
+def _gate_problem(session, records):
+    """Why outputs may not be published, or None: the stored full-sensor gate must exist and have
+    passed, and the same comparison on the present records must pass too."""
+    stored = read_record(session.work / "reproducibility_gate.json")
+    if stored is None:
+        return "the full-sensor reproducibility gate record is missing"
+    full = [c for c in session.plan["conditions"] if c["stage"] == 1]
+    checked = [c.get("model") for c in stored.get("checks", [])]
+    if stored.get("passed") is not True or sorted(map(str, checked)) != sorted(c["model"] for c in full):
+        return "the stored full-sensor reproducibility gate did not pass for every model"
+    mine = [records.get(c["experiment_id"], {**c, "status": "not_run"}) for c in full]
+    if any(r.get("status") != OK for r in mine) or not reproducibility_gate(session.cfg, session.sources, mine)["passed"]:
+        return "the present full-sensor records do not pass the reproducibility gate"
+    return None
+
+
 def _refuse_other_execution(artifacts, rows):
     """Published outputs of a different execution are historical evidence: never replace them."""
-    manifest = read_record(artifacts / "manifest.json")
+    manifest = _read_manifest(artifacts)
     if manifest is None:
         return
+    if set(manifest["conditions"]) != {r["experiment_id"] for r in rows}:
+        raise RuntimeError(f"{artifacts} belongs to a different experiment; its outputs are never replaced")
     new = {r["experiment_id"]: r["mlflow_run_id"] for r in rows if r["status"] == OK}
-    for key, old in manifest.get("conditions", {}).items():
+    for key, old in manifest["conditions"].items():
         if old.get("mlflow_run_id") and key in new and new[key] != old["mlflow_run_id"]:
             raise RuntimeError(f"{artifacts} holds the outputs of another execution; move it before writing "
                                "new outputs")
@@ -300,9 +361,11 @@ def report(session, summary, paths):
     environment = session.environment()
     git = environment["git"]
     dirty_flags = {r["git_dirty"] for r in rows if r["status"] == OK}
+    execution_class = ("verification" if True in dirty_flags else
+                       "clean_commit" if dirty_flags == {False} else "unknown")
     commits = sorted({r["git_commit"] for r in rows if r["git_commit"]})
     run_git = {"git_commit": commits[0] if len(commits) == 1 else ", ".join(commits) or git["git_commit"],
-               "git_dirty": bool(True in dirty_flags) if dirty_flags else git["git_dirty"]}
+               "git_dirty": {"verification": True, "clean_commit": False}.get(execution_class, UNKNOWN)}
     budgets, models = cfg["matrix"]["budgets"], cfg["matrix"]["models"]
     con = conclusions(rows, summary["degradation"], summary["versus"], summary["robustness"], summary["statistics"],
                       summary["pareto_ids"], budgets, float(cfg["analysis"]["close_to_full_tolerance_pct"]))
@@ -354,9 +417,15 @@ def report(session, summary, paths):
         "source_hashes": plan["source_hashes"], "data": plan["data"], "training_protocol": plan["training_protocol"],
         "training_seeds": cfg["matrix"]["training_seeds"], "subset_seeds": cfg["matrix"]["random_subset_seeds"],
         "report_environment": environment, "git_commit": run_git["git_commit"], "git_dirty": run_git["git_dirty"],
-        "canonical": False if run_git["git_dirty"] else None,
-        "evidence_class": ("verification runs executed from an uncommitted working tree; not canonical"
-                           if run_git["git_dirty"] else "runs executed from a clean commit"),
+        "execution_class": execution_class,
+        # the pipeline can rule canonical status out, never grant it: that is a publication decision
+        "canonical": None if execution_class == "clean_commit" else False,
+        "canonical_note": ("null: eligible but not designated by the pipeline; canonical evidence is the output set "
+                           "that was reviewed and committed" if execution_class == "clean_commit"
+                           else "false: these runs cannot be canonical evidence"),
+        "evidence_class": {"verification": "verification runs executed from an uncommitted working tree; not canonical",
+                           "clean_commit": "runs executed from a clean commit",
+                           "unknown": "source state of the runs is unknown; not canonical"}[execution_class],
         "official_test_evaluation": "not performed",
         "execution_provenance": _execution_provenance(records), "report_source_hashes": source_hashes(),
         "record_files_sha256": {r["experiment_id"]: sha256_file(session.work / "conditions" /
@@ -426,6 +495,10 @@ def publish(session, output_dir):
     if done < session.plan["n_conditions"]:
         say(f"Only {done} of {session.plan['n_conditions']} records are complete and valid; nothing published.")
         return 3
+    problem = _gate_problem(session, summary["records"])
+    if problem:
+        say(f"NOT PUBLISHED: {problem}.")
+        return 2
     report(session, summary, paths)
     say(f"Published {done} records to {root}")
     return 0
@@ -444,9 +517,14 @@ def _run(config_path, stage, limit, output_dir=None):
         return publish(session, output_dir)
     executor = Executor(session.cfg, session.text, session.config_path, plan, session.sources, session.data,
                         session.environment())
+    git = executor.environment["git"]
+    if git["git_commit"] == UNKNOWN or git["git_dirty"] == UNKNOWN:
+        raise RuntimeError("the git commit or working-tree state cannot be determined; nothing is written")
     executor.refuse_foreign_records()                           # before anything is written
+    _require_compatible_outputs(session)
     with execution_lock(session.work):
         executor.refuse_foreign_records()
+        _require_compatible_outputs(session)
         return _run_locked(session, stage, limit)
 
 
@@ -470,6 +548,10 @@ def _run_locked(session, stage, limit):
         return 2
     complete = done == plan["n_conditions"]
     if stage in ("report", "all"):
+        problem = _gate_problem(session, summary["records"])
+        if problem:
+            say(f"NOT PUBLISHED: {problem}.")
+            return 3 if stage == "all" and not complete else 2
         paths = output_paths(session, None if complete else session.work / "incomplete_outputs")
         report(session, summary, paths)
         say(f"Report: {paths['report']}")

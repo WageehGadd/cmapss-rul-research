@@ -311,8 +311,8 @@ def _evidence(rows, versus, robustness, stats, front, budgets, tolerance):
     statistical.append("These statements describe 20 validation engines and one training seed.")
 
     exploratory = [
-        "The permutation-against-correlation counts, the practical reading of the Pareto front and the latency "
-        "repeatability figures were examined after the results were seen. No hypothesis test supports them.",
+        "The permutation-against-correlation counts and the practical reading of the Pareto front were examined after "
+        "the results were seen. No hypothesis test supports them.",
         "The hypotheses in section 1 and the choice of Pareto objectives have no timestamped record before training; "
         "the tolerance, test families, correction and bootstrap settings are in the config logged with every run."]
 
@@ -372,12 +372,14 @@ def _incident_evidence(diagnosis):
 
 def _hardware_notes(conditions):
     if not conditions:
-        return ["Power source and concurrent load were not recorded for these runs."]
+        return ["Power source and concurrent load were not recorded for these runs.",
+                "Latency repeatability was not measured for these runs."]
     seen, repeat = conditions["operator_observations"], conditions["latency_repeatability"]
     return [f"Power source and load during the runs: {seen['power']}; {seen['load']}. These are operator "
             "observations, not run metadata.",
             "The same full-sensor definition timed twice differed by up to "
-            f"{repeat['max_relative_difference_pct']:.0f}% in latency (one repeat per model)."]
+            f"{repeat['max_relative_difference_pct']:.0f}% in latency (one repeat per model; examined after the "
+            "results were seen)."]
 
 
 def _gate_history(diagnosis):
@@ -407,6 +409,16 @@ def _latency_caveat(front):
             "not show that a smaller or random subset is faster.", ""]
 
 
+def _source_difference(produced, git):
+    """What to say when the sources writing the report are not those that trained the models."""
+    if produced["source_matches_current"]:
+        return ""
+    origin = (f"it is the source of commit `{str(git['git_commit'])[:12]}`" if git["git_dirty"] is False
+              else "it was not committed")
+    return (" **The source has changed since the runs were executed: the code that trained them is not the code "
+            f"listed there; {origin}.**")
+
+
 def write_report(path, ctx):
     cfg, plan, rows = ctx["cfg"], ctx["plan"], ctx["rows"]
     evidence, figures_link = ctx["conclusions"]["evidence"], ctx["figures_link"]
@@ -417,8 +429,8 @@ def write_report(path, ctx):
     complete = con["complete"]
     banner = ("" if complete else f"**INCOMPLETE EXPERIMENT: {con['completed']} of {con['planned']} conditions "
               "completed. No conclusion below should be read as the finished study.**")
-    verification = ("**Verification run from an uncommitted working tree (`git_dirty=True`); not canonical.**"
-                    if git["git_dirty"] else "")
+    verification = {True: "**Verification run from an uncommitted working tree (`git_dirty=True`); not canonical.**",
+                    False: ""}.get(git["git_dirty"], "**Source state of the runs is unknown; not canonical.**")
     num = {"val_rmse": ".3f", "val_mae": ".3f", "val_r2": ".4f", "val_nasa_score": ".0f", "train_time_s": ".1f",
            "inference_latency_ms_per_batch": ".2f", "relative_pct": "+.1f"}
 
@@ -504,7 +516,7 @@ def write_report(path, ctx):
                                    "rmse_max"], {k: ".3f" for k in ("rmse_mean", "rmse_median", "rmse_std",
                                                                     "rmse_min", "rmse_max")}), "",
              f"![ranked vs random]({figures_link}/{FIGURES[2]})", "",
-             "## 11. Relative degradation", "",
+             "## 11. Relative degradation", "", CONTAMINATED, "",
              "`100 x (RMSE_reduced - RMSE_full) / RMSE_full` against the same model's Session 7 full-sensor run; negative "
              "values are kept.", "", f"![degradation]({figures_link}/{FIGURES[3]})", "",
              "## 12. Architecture robustness", "", "Descriptive. Relative increases depend on each model's own "
@@ -533,7 +545,8 @@ def write_report(path, ctx):
              *[f"- {t}" for t in _hardware_notes(ctx.get("execution_conditions"))],
              "- Membership among conditions of similar latency can change with timing noise. Efficient random or "
              "reduced subsets are not shown to be faster.", "", f"![pareto]({figures_link}/{FIGURES[1]})", "",
-             "## 15. Planned paired statistical comparisons", "",
+             "## 15. Planned paired statistical comparisons", "", CONTAMINATED + " This applies to every permutation row "
+             "and its test.", "",
              "Unit of analysis: validation engine (per-engine RMSE over its windows; overlapping windows are never "
              "treated as independent). Two-sided Wilcoxon signed-rank, Holm correction within each of the two "
              "predeclared families, effect size = matched-pairs rank-biserial, 95% bootstrap interval of the median "
@@ -593,8 +606,7 @@ def write_report(path, ctx):
              "Software and hardware rows describe the machine that wrote this report; the execution environment of the "
              "runs is in the manifest (`execution_provenance`), with hashes of the sources that wrote this report "
              "(`report_source_hashes`)."
-             + ("" if produced["source_matches_current"] else " **The source has changed since the runs were executed: "
-                "the code that trained them is not the code listed there, and it was never committed.**"), "",
+             + _source_difference(produced, git), "",
              "## 20. Session 8 handoff", "",
              f"- `{ctx['artifacts_ref']}/experiment_plan.json`: every condition with sensors, indices and definition "
              "hashes.",

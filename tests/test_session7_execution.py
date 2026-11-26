@@ -245,14 +245,8 @@ def test_master_table_manifest_figures_and_report(env):
 # ---- regression tests for the audit findings ---------------------------------------------------
 
 def with_git(monkeypatch, **git):
-    real = run_session7.capture_environment
-
-    def fake(*args, **kwargs):
-        environment = real(*args, **kwargs)
-        environment["git"] = {**environment["git"], **git}
-        return environment
-
-    monkeypatch.setattr(run_session7, "capture_environment", fake)
+    real = run_session7.git_state
+    monkeypatch.setattr(run_session7, "git_state", lambda root: {**real(root), **git})
 
 
 @pytest.mark.parametrize("git,reason", [({"git_dirty": False}, "clean/dirty"), ({"git_commit": "f" * 40}, "commit")])
@@ -347,7 +341,7 @@ def test_publish_writes_only_a_new_folder_and_states_the_source_difference(env, 
                  "mean of the random draws", "Statistical conclusions (20 engines)", "Exploratory and post-hoc",
                  "Numerical versus practical", "Hardware-dependent latency", "code that trained them"):
         assert text in report, text
-    for section in (8, 9, 10):                                            # caveat attached to the findings
+    for section in (8, 9, 10, 11, 15):                                    # caveat attached to the findings
         body = report.split(f"\n## {section}. ")[1].split("\n## ")[0]
         assert "Selection-contaminated" in body, section
     assert len(list((target / "figures").glob("fig*.png"))) == 5

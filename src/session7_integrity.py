@@ -16,7 +16,9 @@ import fcntl
 import json
 import math
 import os
+import re
 import sqlite3
+import subprocess
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -24,7 +26,10 @@ import numpy as np
 
 from .evaluation import predictions_digest
 from .metrics import compute_metrics
+from .session7_plan import DEEP
 
+UNKNOWN = "unavailable"
+METRIC_NAMES = ("rmse", "mae", "r2", "nasa_score")
 PROVENANCE_FIELDS = (("code_fingerprint", "execution code changed"),
                      ("execution_fingerprint", "execution settings changed"),
                      ("git_commit", "source commit changed"),
@@ -34,6 +39,70 @@ RESOURCE_METRICS = {"train_time_s": "train_time_s", "model_size_bytes": "model_s
                     "inference_latency_ms_per_batch": "inference_latency_ms_per_batch",
                     "inference_latency_ms_per_sample": "inference_latency_ms_per_sample",
                     "throughput_samples_per_s": "throughput_samples_per_s", "n_parameters": "n_parameters"}
+
+
+COUNT_FIELDS = ("model_size_bytes", "n_parameters")                 # positive integers
+TIMING_FIELDS = tuple(f for f in RESOURCE_METRICS if f not in COUNT_FIELDS)      # positive numbers
+
+
+def git_state(root):
+    """Commit and clean/dirty state of the tree at `root`. When git cannot answer, the value is
+    "unavailable": a failed `git status` is never read as a clean tree."""
+    def run(*args):
+        try:
+            return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True, timeout=30,
+                                  check=True).stdout.strip()
+        except (OSError, subprocess.SubprocessError):
+            return None
+
+    commit, status = run("rev-parse", "HEAD"), run("status", "--porcelain")
+    return {"git_commit": commit or UNKNOWN, "git_dirty": UNKNOWN if status is None or not commit else bool(status)}
+
+
+def _number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+
+
+def _integer(value, minimum):
+    return isinstance(value, int) and not isinstance(value, bool) and value >= minimum
+
+
+def _text(value):
+    return isinstance(value, str) and bool(value)
+
+
+def schema_problem(condition, record):
+    """Why a completed record lacks a required field or holds an invalid value, or None. Deep models
+    carry a training summary and a weight digest; classical records define neither."""
+    metrics = record.get("metrics")
+    if not isinstance(metrics, dict):
+        return "metrics are missing"
+    for name in METRIC_NAMES:
+        if not _number(metrics.get(name)):
+            return f"metric {name} is missing or not a finite number"
+    for field in TIMING_FIELDS:
+        if not _number(record.get(field)) or record[field] <= 0:
+            return f"{field} is missing or not a positive number"
+    for field in COUNT_FIELDS:
+        if not _integer(record.get(field), 1):
+            return f"{field} is missing or not a positive integer"
+    for field in ("code_fingerprint", "started_at", "ended_at", "git_commit", "mlflow_run_id", "run_dir"):
+        if not _text(record.get(field)):
+            return f"{field} is missing"
+    if not isinstance(record.get("git_dirty"), bool):
+        return "git_dirty is missing or unknown"
+    if condition["model"] in DEEP:
+        digest = record.get("weights_sha256")
+        if not (isinstance(digest, str) and re.fullmatch(r"[0-9a-f]{64}", digest)):
+            return "weights_sha256 is missing or not a SHA-256 digest"
+        for field in ("best_epoch", "epochs_run"):
+            if not _integer(record.get(field), 0):
+                return f"{field} is missing or not an integer"
+        if not _text(record.get("stop_reason")):
+            return "stop_reason is missing"
+    elif "weights_sha256" in record:
+        return "weights_sha256 is not defined for a classical model"
+    return None
 
 
 class RunStore:
@@ -74,6 +143,9 @@ def validate_record(condition, record, y_validation, store, experiment_name, sha
     for key in ("experiment_id", "model", "budget", "strategy", "sensors", "sensor_indices", "training_seed"):
         if record.get(key) != condition[key]:
             return False, f"record {key} differs from the plan"
+    problem = schema_problem(condition, record)
+    if problem:
+        return False, problem
     try:
         run_dir = Path(record["run_dir"])
         files = record["files"]
@@ -117,10 +189,10 @@ def validate_record(condition, record, y_validation, store, experiment_name, sha
             if not _close(run["metrics"].get(f"validation_{name}"), value):
                 return False, f"metrics do not match MLflow: {name}"
         for field, metric in RESOURCE_METRICS.items():
-            if record.get(field) is not None and not _close(record[field], run["metrics"].get(metric)):
+            if not _close(record[field], run["metrics"].get(metric)):
                 return False, f"{field} does not match MLflow"
 
-        if record.get("weights_sha256"):                      # deep models: the saved training summary
+        if condition["model"] in DEEP:                        # the saved training summary and weights
             saved = [f for f in files if f.endswith("_config.json")]
             summary = json.loads((run_dir / saved[0]).read_text())
             for key in ("best_epoch", "epochs_run", "stop_reason", "n_parameters"):
