@@ -69,6 +69,14 @@ snapshot was not rewritten.
 
 | Field | Value |
 |---|---|
-| Focused re-review of these fixes | pending |
-| Reviewer decision | pending |
-| Reviewed commit | none; nothing is committed |
+| Focused re-review of these fixes | done 2026-11-26, read-only, by a reviewer that had done the first Session 8 audit and wrote none of the fixes |
+| Reviewer decision | PASS: ready for controlled commit and publication; no required fix |
+| Reviewed state | the uncommitted package on `5416845`: `README.md` and 50 new files |
+| Commit of the reviewed files | `a3442b4e414eeee2e80e2b6a1d0fd1a267e1b59a`; all 51 files byte-identical to the reviewed fingerprints; `verify` 0 problems before and after |
+| Review report (kept outside the repository), SHA-256 | `f5301a299c6d64f308f9490d122bf19eafc87844a56f7888cbc6f2d272f8c1a7` |
+| Trusted reference as committed, SHA-256 | `6271abf0e6fe09c60baa0e25f3d153cc26c958349542c7161e4ffb7919e77e77` |
+| Owner decision | local commit authorized, accepting that the Git-ignored evidence has no off-device backup yet |
+
+This record supersedes "not yet committed" above. The commit is local until pushed, so it is not yet an
+anchor held elsewhere. The results remain **not canonical**: the commit came after execution and says
+nothing about the source state that produced them.
