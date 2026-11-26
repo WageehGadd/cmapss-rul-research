@@ -7,7 +7,8 @@ Research project on aircraft-engine RUL prediction with the NASA C-MAPSS turbofa
 Raw NASA C-MAPSS files (FD001-FD004) are in `data/raw/`. Each train/test file has 26
 whitespace-separated columns: `unit_id`, `cycle`, 3 operational settings and 21 sensors.
 FD001 (100 train engines, 100 test engines, one operating condition) is the working subset.
-FD003 is present but not used yet.
+FD003 is used only in [Session 8](#session-8-generalisation-to-fd003-and-error-analysis), for evaluation;
+no model is trained on it.
 
 ## Session 1: RUL learning problem
 
@@ -158,6 +159,29 @@ python -m src.run_session3 --config configs/session3_classical_ml.yaml   # about
 Predictions, rankings and subsets are reproducible; timings vary. Permutation importance on
 individual features understates sensors whose features are mutually redundant (for example
 `last`, `mean`, `min`, `max` of the same sensor).
+
+## Session 8: generalisation to FD003 and error analysis
+
+Session 8 applies the 174 frozen Session 7 models, trained on FD001, to FD003 without retraining or
+refitting the scaler, and analyses errors by remaining-life stage, engine and direction. It also holds a
+small training-cap sensitivity study on FD001.
+
+- [Research report](reports/session8_research_report.md)
+- [Evaluation protocol](reports/session8_evaluation_protocol.md)
+- [Reproducibility guide](reports/session8_reproducibility.md)
+- [Integrity review note](reports/session8_integrity_review_note.md)
+
+The report, tables and figures can be read from the repository alone. Verifying or re-deriving them
+needs evidence that Git ignores: the Session 7 models, the saved predictions and refits (`results/`),
+the MLflow store (`mlruns/`) and the processed FD001 data (`data/processed/`). A clone cannot
+reproduce the study without a copy of these.
+
+The completed execution is **not canonical**: it ran from an uncommitted working tree and the source
+state behind its predictions was not recorded. Committing or publishing does not change that.
+
+```bash
+python -m src.run_session8 --config configs/session8_evaluation.yaml --stage verify   # read-only
+```
 
 ## Layout
 

@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "note": "Reviewed publication metadata, made after execution. Read by code, never written by it. Not execution evidence.",
+  "executions": [
+    {
+      "working_dir": "results/session8",
+      "artifacts_dir": "artifacts/session8",
+      "figures_dir": "reports/figures",
+      "report": "reports/session8_research_report.md",
+      "experiment_name": "cmapss_rul_session8",
+      "evidence_manifest_sha256": "6ee22d851e269d63c4bb278d95b5a5a85f4ff22d4000ddae87ae0f0d87738fd3",
+      "artifacts_manifest_sha256": "2821920e552b39f5b604b76bb99248f4a8ca594403a894858ae7607e64a62fbb",
+      "canonical": false,
+      "evidence_class": "not canonical: the source state of some evidence was not recorded",
+      "supplementary_files": {
+        "frozen_snapshot.json": "670868f21fb1dad982415989225af2fb7bf84c89cf683bc2ac796c58534acb96",
+        "mlflow_before_session8.db": "9fdb3e97baa8a57ac06da2112b53640ebfaf1d0af46fc7f5d6ceaa02ca6f8836",
+        "protocol_hashes_at_writing.txt": "441dc4509db353c1c710a442dffcbffb150c9eecf45e95ae39abfe94816cf70d"
+      },
+      "sources_changed_after_derivation": {
+        "src/session8_guard.py": {
+          "derived_with": null,
+          "current": "0120ddb8327c17387ba54d941ef92b1c8d14d63a9d855d6bae9c55ab39852ba4"
+        },
+        "src/session8_evidence.py": {
+          "derived_with": "cd7b468736c47cd052ee2ebd7d0fafdb07e0b4c12726ef220c46879792f646e0",
+          "current": "1bdb22f5a02fe9e95c4343e319f995997904df74ec7b209fe8afedfef00f81fe"
+        },
+        "src/session8_data.py": {
+          "derived_with": "54f23b89b7411a709d0112dbad6ace0eac080d6144906411fbe57b02585c591c",
+          "current": "ca60588627958773feeae2f578a7809352b2970f8fa2aca0b02f2a2cb846ab38"
+        },
+        "src/session8_inference.py": {
+          "derived_with": "59b7536f2725bc7300a1d3144905166a145c727974d9843ecf024783a361cb94",
+          "current": "8b1986ed3a7c4c396fbb4bbcc9035803718b2356de72482196618fdf1d034162"
+        },
+        "src/session8_sensitivity.py": {
+          "derived_with": "2e785f6ca026988e432bbeef38bbe58d501b61f83c38788e1328a203722d14f1",
+          "current": "034b62bac5e4c4d004f75a40f6609ce59ac0509f19c612eea727013d11b6cff3"
+        },
+        "src/run_session8.py": {
+          "derived_with": "93ae24597128dc60b27511703e8e8c83a3cb8aa7e712884191e93a8c7dbaa40a",
+          "current": "37d6cccda08bf0c35440c856ad22873a5ca3b7160ecb05a4395563848ed4986b"
+        }
+      },
+      "reviewed_snapshot_changes": {
+        "README.md": {
+          "snapshot": "03b8f38e463d901884f2599fad5dfb39700be06868f4e13855e1a61aa30abc68",
+          "current": "5bac83ac7f6289358bf6cdfad7e60cb4b1cbf93ee669c6847f0b122498abd8ca"
+        }
+      }
+    }
+  ]
+}

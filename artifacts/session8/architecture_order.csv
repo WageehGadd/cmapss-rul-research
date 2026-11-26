@@ -1,0 +1,22 @@
+kind,protocol,model,value,rank
+rmse,fd001_validation,random_forest,12.95051830929376,4
+rmse,fd001_validation,gradient_boosting,12.791487775815147,3
+rmse,fd001_validation,lstm,12.990028477338315,5
+rmse,fd001_validation,gru,12.44037829811757,2
+rmse,fd001_validation,tcn,14.636878792816178,6
+rmse,fd001_validation,transformer,12.320710742477193,1
+rmse,fd001_test_previously_inspected,random_forest,11.59097434083576,1
+rmse,fd001_test_previously_inspected,gradient_boosting,12.840957247028559,2
+rmse,fd001_test_previously_inspected,lstm,13.856885585288484,4
+rmse,fd001_test_previously_inspected,gru,14.296468921398535,5
+rmse,fd001_test_previously_inspected,tcn,14.55526088242725,6
+rmse,fd001_test_previously_inspected,transformer,12.91479228792876,3
+rmse,fd003_test,random_forest,20.022125706535796,1
+rmse,fd003_test,gradient_boosting,20.979053497088856,2
+rmse,fd003_test,lstm,23.40776919830768,3
+rmse,fd003_test,gru,27.52171396372279,4
+rmse,fd003_test,tcn,116.53173741620758,6
+rmse,fd003_test,transformer,30.95004155721807,5
+spearman,fd001_validation vs fd003_test,all six,0.028571428571428574,
+spearman,fd001_test_previously_inspected vs fd003_test,all six,0.8285714285714287,
+spearman,fd001_validation vs fd001_test_previously_inspected,all six,0.3142857142857143,

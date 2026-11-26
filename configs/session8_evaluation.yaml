@@ -1,0 +1,80 @@
+# Session 8 configuration: reliability, FD001 -> FD003 generalisation and error analysis.
+# Written before any FD003 prediction was computed or any FD003 test label was read by this project.
+# All paths are relative to the project root. Protocol: reports/session8_evaluation_protocol.md
+
+upstream:
+  session1_config: configs/session1_fd001.yaml
+  session7_config: configs/session7_main_experiment.yaml
+  session7_manifest: artifacts/session7/manifest.json
+  session7_working_dir: results/session7
+  mlflow_dir: mlruns
+  processed_dir: data/processed/fd001        # FD001 train/validation arrays and the FD001 scaler
+  historical_results: results/benchmark_results.json   # read only: earlier FD001 rows
+
+fd003:
+  raw_dir: data/raw
+  files:
+    train: train_FD003.txt
+    test: test_FD003.txt
+    rul: RUL_FD003.txt
+  sha256:
+    train: 2abbe9968cc5e8eb091980f51b20f62bb4127336d3482cb52071d53bf23329e2
+    test: 299babd63c8d987cef079c4a425429f33b3a34797d803bbe2ad48c29dbd0d790
+    rul: df1e0566306b174a2de41c67a3e7a51877889598b78643fc3e5685259091b7cb
+  expected: {train_engines: 100, train_rows: 24720, test_engines: 100, test_rows: 16596}
+
+evaluation:
+  rul_cap: 125                       # targets are min(true RUL, 125), as in Sessions 1-7
+  tolerance_pct: 5.0                 # Session 7 acceptable-accuracy tolerance
+  error_convention: predicted_minus_true
+  stage_variable: raw_rul            # stages use the uncapped true RUL (identical below the cap)
+  stages:
+    - {name: near_failure, low: 0, high: 50}
+    - {name: intermediate, low: 51, high: 100}
+    - {name: early_life, low: 101, high: null}
+  reference_model: transformer       # lowest FD001 validation RMSE with 14 sensors
+
+candidates:                          # chosen from FD001 validation results only
+  - {key: transformer_full,  model: transformer,       budget: 14, strategy: full,        role: lowest FD001 validation RMSE}
+  - {key: gru_full,          model: gru,               budget: 14, strategy: full,        role: efficiency-oriented full-sensor alternative}
+  - {key: gb_full,           model: gradient_boosting, budget: 14, strategy: full,        role: classical reference (lowest classical validation RMSE)}
+  - {key: rf_full,           model: random_forest,     budget: 14, strategy: full,        role: full-sensor architecture}
+  - {key: lstm_full,         model: lstm,              budget: 14, strategy: full,        role: full-sensor architecture}
+  - {key: tcn_full,          model: tcn,               budget: 14, strategy: full,        role: full-sensor architecture}
+  - {key: gru_k10_perm,      model: gru,               budget: 10, strategy: permutation, role: preferred reduced (lowest RMSE within tolerance); selection-contaminated}
+  - {key: tcn_k07_perm,      model: tcn,               budget: 7,  strategy: permutation, role: smallest budget within tolerance; selection-contaminated}
+  - {key: gb_k10_random,     model: gradient_boosting, budget: 10, strategy: random,      role: reduced within tolerance without ranking (mean of 5 draws)}
+  - {key: gru_k02_perm,      model: gru,               budget: 2,  strategy: permutation, role: aggressive reduction; selection-contaminated}
+  - {key: gru_k02_corr,      model: gru,               budget: 2,  strategy: correlation, role: aggressive reduction (training-only ranking)}
+preferred_reduced: gru_k10_perm
+
+statistics:
+  alpha: 0.05
+  correction: holm                   # within each family
+  bootstrap_resamples: 10000
+  bootstrap_seed: 12345
+  per_engine_unit: absolute_error    # FD003 test has one prediction per engine
+  families:
+    A_reduced_vs_full: [gru_k10_perm, tcn_k07_perm, gb_k10_random, gru_k02_perm, gru_k02_corr]
+    B_full_vs_reference: [gru_full, gb_full, rf_full, lstm_full, tcn_full]
+    C_ranked_vs_random_mean: all     # 6 models x 4 budgets x 2 rankings = 48
+
+error_analysis:
+  full_models: [random_forest, gradient_boosting, lstm, gru, tcn, transformer]
+  worst_n: 5                         # engines listed per criterion
+  plot_n: 3                          # worst engines plotted per trajectory dataset
+  overlap_n: 10                      # size of each model's worst set for agreement
+  sensor_plot: [sensor_4, sensor_9, sensor_11, sensor_12]   # sensors of the k=4/k=2 subsets
+
+sensitivity:
+  caps: [100, 150]                   # training caps compared with the frozen 125
+  control_cap: 125                   # refit that must reproduce the canonical predictions
+  configurations: [transformer_full, gru_full, gb_full, rf_full, lstm_full, tcn_full, gru_k10_perm]
+  common_subset_max_raw_rul: 100     # validation windows whose target is the same under every cap
+  experiment_name: cmapss_rul_session8
+
+outputs:
+  working_dir: results/session8
+  artifacts_dir: artifacts/session8
+  figures_dir: reports/figures
+  report: reports/session8_research_report.md
