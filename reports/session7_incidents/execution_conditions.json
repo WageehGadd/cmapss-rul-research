@@ -1,0 +1,45 @@
+{
+  "applies_to_code_fingerprint": "d773c69e3ff9bca1e700a8d66d50285c94387db858a3fbd368b16ccf6e341dc7",
+  "latency_repeatability": {
+    "how": "inference latency of the same full-sensor definition in the superseded and the final run (from MLflow); only one repeat per model, so this is an indication, not a variance estimate",
+    "by_model": {
+      "gru": {
+        "first_ms": 3.15708350535715,
+        "second_ms": 3.1047084921738133,
+        "relative_difference_pct": 1.6869542926609986
+      },
+      "lstm": {
+        "first_ms": 5.018083000322804,
+        "second_ms": 4.985374995158054,
+        "relative_difference_pct": 0.6560791354013874
+      },
+      "transformer": {
+        "first_ms": 8.742583508137614,
+        "second_ms": 9.242292006092612,
+        "relative_difference_pct": 5.7157989682325425
+      },
+      "random_forest": {
+        "first_ms": 4.039687504700851,
+        "second_ms": 4.5210624957690015,
+        "relative_difference_pct": 11.916144268782936
+      },
+      "gradient_boosting": {
+        "first_ms": 3.8054374963394366,
+        "second_ms": 4.247582997777499,
+        "relative_difference_pct": 11.61878238345461
+      },
+      "tcn": {
+        "first_ms": 48.620145505992696,
+        "second_ms": 50.35566649894463,
+        "relative_difference_pct": 3.5695512115199675
+      }
+    },
+    "max_relative_difference_pct": 11.916144268782936
+  },
+  "operator_observations": {
+    "status": "observed by the operator with system tools during the session; NOT recorded in any run's metadata",
+    "power": "battery power: about 88% before launch, 27% at a later check after completion",
+    "load": "other applications were running; load average about 3 to 4 before launch",
+    "sleep_prevention": "caffeinate -i"
+  }
+}

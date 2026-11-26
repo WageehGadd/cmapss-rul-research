@@ -1,0 +1,61 @@
+# Session 7 configuration: main experiment, sensor budget x model architecture.
+# Everything below is declared before any condition is trained. Paths are relative to the project root.
+
+session1:
+  config: configs/session1_fd001.yaml
+  processed_dir: data/processed/fd001     # frozen arrays; only the train and validation files are opened
+
+session2:
+  config: configs/session2_benchmark.yaml # timing protocol and MLflow store
+
+benchmark:
+  target_type: capped
+  seed: 42                                # model training seed (NOT a sensor-subset seed)
+  evaluation_sets: [validation]           # the official test set is not part of this experiment
+  sensor_set_name: session7
+
+frozen_sources:                           # read-only inputs; every file is checked against its manifest
+  selected_models: artifacts/session3/selected_models.json
+  subsets_topk: artifacts/session3/sensor_subsets_topk.json
+  subsets_randomk: artifacts/session3/sensor_subsets_randomk.json
+  lstm: artifacts/session4/selected_lstm.json
+  gru: artifacts/session4/selected_gru.json
+  tcn: artifacts/session5/selected_tcn.json
+  transformer: artifacts/session6/selected_transformer.json
+  manifests: [artifacts/session3/manifest.json, artifacts/session4/manifest.json,
+              artifacts/session5/manifest.json, artifacts/session6/manifest.json]
+  historical_results: results/benchmark_results.json   # read only: full-sensor reference values
+
+matrix:
+  models: [random_forest, gradient_boosting, lstm, gru, tcn, transformer]
+  full_budget: 14
+  budgets: [10, 7, 4, 2]
+  ranked_strategies: [correlation, permutation]
+  random_subset_seeds: [101, 102, 103, 104, 105]
+  training_seeds: [42]                    # one training seed; no seed-repetition study
+
+execution:
+  device: cpu                             # frozen reference device
+  classical_n_jobs_train: -1              # as in Session 3 (does not change results)
+  classical_n_jobs_predict: 1
+  experiment_name: cmapss_rul_session7    # separate MLflow experiment in the same local store
+  reproducibility_gate: exact_predictions # full-sensor runs must reproduce the canonical predictions
+
+analysis:                                 # declared before training
+  close_to_full_tolerance_pct: 5.0        # "retains performance": relative RMSE increase at most this
+  per_engine_metric: rmse                 # windows of one validation engine are aggregated to its RMSE
+  statistics:
+    test: wilcoxon_signed_rank            # paired over validation engines, two-sided
+    alpha: 0.05
+    correction: holm                      # applied within each comparison family
+    families:
+      - reduced_ranked_vs_full            # per model, budget, ranked strategy: reduced minus own full
+      - ranked_vs_random_mean             # per model, budget, ranked strategy: ranked minus mean of 5 random
+    bootstrap_resamples: 10000
+    bootstrap_seed: 12345
+
+outputs:
+  frozen_dir: artifacts/session7
+  working_dir: results/session7           # git-ignored: records, runs, predictions, tables
+  report: reports/session7_main_experiment_report.md
+  figures_dir: reports/figures

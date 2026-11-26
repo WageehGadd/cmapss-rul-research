@@ -1,0 +1,157 @@
+{
+  "event": "first full-sensor gate failed",
+  "gate": {
+    "checks": [
+      {
+        "model": "random_forest",
+        "experiment_id": "s7_random_forest_k14_full_b0bdfcbc16",
+        "sensors_ok": true,
+        "rmse": 12.95051830929376,
+        "canonical_rmse": 12.95051830929376,
+        "rmse_difference": 0.0,
+        "predictions_identical": true,
+        "weights_identical": null,
+        "n_parameters": 117656,
+        "canonical_n_parameters": 117656,
+        "passed": true
+      },
+      {
+        "model": "gradient_boosting",
+        "experiment_id": "s7_gradient_boosting_k14_full_718c8a6dc8",
+        "sensors_ok": true,
+        "rmse": 12.856373911384217,
+        "canonical_rmse": 12.791487775815147,
+        "rmse_difference": 0.06488613556907019,
+        "predictions_identical": false,
+        "weights_identical": null,
+        "n_parameters": 12192,
+        "canonical_n_parameters": 12196,
+        "passed": false
+      },
+      {
+        "model": "lstm",
+        "experiment_id": "s7_lstm_k14_full_7f84482e29",
+        "sensors_ok": true,
+        "rmse": 12.990028477338315,
+        "canonical_rmse": 12.990028477338315,
+        "rmse_difference": 0.0,
+        "predictions_identical": true,
+        "weights_identical": true,
+        "n_parameters": 14625,
+        "canonical_n_parameters": 14625,
+        "passed": true
+      },
+      {
+        "model": "gru",
+        "experiment_id": "s7_gru_k14_full_19b42c55b3",
+        "sensors_ok": true,
+        "rmse": 12.44037829811757,
+        "canonical_rmse": 12.44037829811757,
+        "rmse_difference": 0.0,
+        "predictions_identical": true,
+        "weights_identical": true,
+        "n_parameters": 15425,
+        "canonical_n_parameters": 15425,
+        "passed": true
+      },
+      {
+        "model": "tcn",
+        "experiment_id": "s7_tcn_k14_full_e1cb4eb4ce",
+        "sensors_ok": true,
+        "rmse": 14.636878792816178,
+        "canonical_rmse": 14.636878792816178,
+        "rmse_difference": 0.0,
+        "predictions_identical": true,
+        "weights_identical": true,
+        "n_parameters": 23617,
+        "canonical_n_parameters": 23617,
+        "passed": true
+      },
+      {
+        "model": "transformer",
+        "experiment_id": "s7_transformer_k14_full_0fe6834130",
+        "sensors_ok": true,
+        "rmse": 12.320710742477193,
+        "canonical_rmse": 12.320710742477193,
+        "rmse_difference": 0.0,
+        "predictions_identical": true,
+        "weights_identical": true,
+        "n_parameters": 68097,
+        "canonical_n_parameters": 68097,
+        "passed": true
+      }
+    ],
+    "passed": false
+  },
+  "superseded_runs": {
+    "s7_gru_k14_full_19b42c55b3": "6aa8e84f430b4ddda524b7248531b4f4",
+    "s7_lstm_k14_full_7f84482e29": "19568699e26946b7b03faac1e326a023",
+    "s7_transformer_k14_full_0fe6834130": "45edd2e917204f4aa039175e8e975714",
+    "s7_random_forest_k14_full_b0bdfcbc16": "9854c98336f247e4820043483c1f424e",
+    "s7_gradient_boosting_k14_full_718c8a6dc8": "7337a3dbb9fb4032bc6644ec64d93c3c",
+    "s7_tcn_k14_full_e1cb4eb4ce": "4ab2d2b0420e4444bd35339e400b1ec1"
+  },
+  "diagnosis": "subset_data returned a non-C-contiguous array from advanced indexing. The values were identical, but NumPy reductions ran in a different order, so std and slope features differed by at most 4.4e-16. The float64 histogram gradient boosting chose different splits; the random forest (float32 internally) and the deep models (contiguous float32 tensors) were unaffected.",
+  "fix": "subset_data returns np.ascontiguousarray; all six full-sensor conditions are rerun because the execution code changed.",
+  "original_record": {
+    "path": "results/session7/gate_diagnosis.json",
+    "sha256": "89394e292f444407646286d18a3a3e7b50f681d657404e926435f1af7b90d535",
+    "note": "written by the operator during execution; event, gate, diagnosis, fix and superseded_runs above are copied verbatim"
+  },
+  "measured_evidence": {
+    "how": "recomputed from the frozen arrays and the saved models; no model was trained",
+    "features": {
+      "train": {
+        "differing_feature_values": 173500,
+        "max_absolute_difference": 4.440892098500626e-16,
+        "by_feature": {
+          "std": 62599,
+          "slope": 110901
+        },
+        "differing_after_float32_cast": 8
+      },
+      "validation": {
+        "differing_feature_values": 38850,
+        "max_absolute_difference": 3.3306690738754696e-16,
+        "by_feature": {
+          "std": 14056,
+          "slope": 24794
+        },
+        "differing_after_float32_cast": 1
+      }
+    },
+    "failed_rmse": 12.856373911384217,
+    "final_rmse": 12.791487775815147,
+    "cross_prediction": {
+      "failed_model_on_noncontiguous_features": {
+        "rmse": 12.856373911384217,
+        "equals_failed_predictions": true,
+        "equals_final_predictions": false
+      },
+      "failed_model_on_contiguous_features": {
+        "rmse": 12.856494222960867,
+        "equals_failed_predictions": false,
+        "equals_final_predictions": false
+      },
+      "final_model_on_noncontiguous_features": {
+        "rmse": 12.79143025470894,
+        "equals_failed_predictions": false,
+        "equals_final_predictions": false
+      },
+      "final_model_on_contiguous_features": {
+        "rmse": 12.791487775815147,
+        "equals_failed_predictions": false,
+        "equals_final_predictions": true
+      }
+    },
+    "first_structurally_different_tree": 46,
+    "n_trees": 200
+  },
+  "corrections": [
+    "The diagnosis says the random forest was unaffected because it converts features to float32. Some training values still differ after that cast (see measured_evidence.features.train); its predictions did match the canonical ones, but float32 conversion alone does not explain why."
+  ],
+  "limits": [
+    "The source version that produced the failed run was not retained, so the cause rests on the numerical reproduction above, not on re-executing that source.",
+    "Histogram gradient boosting on float64 features can change its tree structure after last-bit input differences; small differences between gradient-boosting results should not be interpreted."
+  ]
+}
