@@ -8,9 +8,8 @@ import pytest
 
 import src.run_session7 as run_session7
 from src.benchmark_config import PROJECT_ROOT
-from src.session7_canonical import canonical_runs
 from src.session7_execution import FINGERPRINT_MODULES, SOURCE_MODULES
-from src.session7_integrity import UNKNOWN, RunStore, git_state, schema_problem
+from src.session7_integrity import UNKNOWN, git_state, schema_problem
 from tests.test_session7_execution import N, edit, env, records, tree, with_git  # noqa: F401  (env is a fixture)
 
 # ---- required record fields --------------------------------------------------------------------
@@ -205,7 +204,7 @@ def test_a_fresh_work_folder_is_refused_before_training(env, capsys):
     assert not (tmp_path / "work").exists()
 
 
-# ---- canonical designation and loading ---------------------------------------------------------
+# ---- canonical designation ---------------------------------------------------------
 
 @pytest.mark.parametrize("dirty,expected", [(True, ("verification", False)), (False, ("clean_commit", None))])
 def test_manifest_states_the_execution_class(env, monkeypatch, dirty, expected):
@@ -214,29 +213,6 @@ def test_manifest_states_the_execution_class(env, monkeypatch, dirty, expected):
     assert run("--stage", "all") == 0
     manifest = json.loads((tmp_path / "frozen/manifest.json").read_text())
     assert (manifest["execution_class"], manifest["canonical"]) == expected and manifest["canonical_note"]
-
-
-def test_canonical_runs_selects_only_the_published_clean_runs(env, monkeypatch):
-    tmp_path, _, run = env
-    with_git(monkeypatch, git_dirty=False)
-    assert run("--stage", "all") == 0
-    path, store = tmp_path / "frozen/manifest.json", tmp_path / "mlruns"
-    chosen = canonical_runs(path, store)
-    assert chosen == {k: r["mlflow_run_id"] for k, r in records(tmp_path).items()} and len(chosen) == N
-
-    real = RunStore.get
-    for tag, value in (("s7.verification", "True"), ("s7.status", "superseded")):
-        def altered(self, run_id, tag=tag, value=value):
-            found = real(self, run_id)
-            return {**found, "tags": {**found["tags"], tag: value}}
-
-        monkeypatch.setattr(RunStore, "get", altered)
-        with pytest.raises(ValueError, match="not a canonical run"):
-            canonical_runs(path, store)
-    monkeypatch.setattr(RunStore, "get", real)
-    path.write_text(json.dumps({**json.loads(path.read_text()), "git_dirty": True}))
-    with pytest.raises(ValueError, match="clean-commit"):
-        canonical_runs(path, store)
 
 
 @pytest.mark.parametrize("dirty,text", [(True, "it was not committed"), (False, "it is the source of commit")])

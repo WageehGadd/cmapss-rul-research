@@ -21,9 +21,18 @@ from src.session7_canonical import canonical_runs
 runs = canonical_runs("artifacts/session7/manifest.json", "mlruns")   # {experiment_id: run_id}, 174
 ```
 
-It reads the store read-only and fails unless every run named by the manifest is FINISHED, active,
-tagged `s7.verification` = `"False"` and `s7.status` = `"completed"`, and carries the manifest's
-commit. MLflow tags are strings: compare with `'False'`, not a boolean. The equivalent search:
+It reads the store read-only and fails unless all of the following hold:
+
+- the manifest is the published one, for commit `0b7d0b3`, listing exactly the 174 conditions of the
+  frozen matrix (IDs and scientific identities), each once and with its own run;
+- every condition record under `results/session7/` has the hash the manifest lists and agrees with it,
+  and its model and prediction files are unchanged;
+- every run is FINISHED, active, tagged `s7.verification` = `"False"` and `s7.status` = `"completed"`,
+  and carries the condition identity and the clean commit.
+
+The expected matrix, commit and manifest hash are constants in `src/session7_canonical.py`. A third
+argument points at a restored copy of `results/session7`. MLflow tags are strings: compare with
+`'False'`, not a boolean. The equivalent tag search (a filter only: it checks none of the above):
 
 ```
 tags.`s7.verification` = 'False' and tags.`s7.status` = 'completed'
@@ -55,12 +64,12 @@ the incident record (checked on 2026-11-26). The incident record is unchanged.
 - Git state comes from `session7_integrity.git_state`, which reports `unavailable` when git cannot
   answer; writing stages then refuse. `src/environment.py` belongs to Session 2 and is unchanged, so
   runners of Sessions 1-6 still read a failed `git status` as clean.
-- The execution fingerprint now includes `checks`, `data_loading`, `rul`, `scaling`, `splitting` and
+- The code fingerprint now includes `checks`, `data_loading`, `rul`, `scaling`, `splitting` and
   `windows`.
 - `report` and `publish` require a passed full-sensor gate.
 - Writing stages refuse configured outputs of another experiment or execution.
 
-**Consequence:** the execution fingerprint and the commit differ from those in the canonical
+**Consequence:** the code fingerprint and the commit differ from those in the canonical
 records, so `run`, `resume`, `summarize`, `report` and `all` refuse to touch `results/session7`.
 That is intended. `validate`, `verify` and `publish` (into a new folder) still work. Session 8 must
 use its own working directory, outputs and MLflow experiment.

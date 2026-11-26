@@ -72,7 +72,7 @@ latency itself was measured on battery. None of the ten is on either published P
 
 The published (RMSE, latency) front has 8 conditions, 7 of them GRU within 0.07 ms of each other.
 The verification run produced 12 for the same predictions, with 5 in common. With sensor count as a
-third objective the figures are 19 and 15, with 12 in common. Since accuracy is identical between
+third objective the figures are 15 and 19, with 12 in common. Since accuracy is identical between
 the two runs, the changes in membership come from timing.
 
 - **Numerical membership** is what the algorithm returns on one set of measurements.
