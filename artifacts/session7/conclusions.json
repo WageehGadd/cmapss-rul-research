@@ -1,0 +1,80 @@
+{
+  "complete": true,
+  "completed": 174,
+  "planned": 174,
+  "questions": {
+    "accuracy_versus_sensor_count": [
+      "k=10, correlation subsets (training data only): relative RMSE change +8.6% to +24.7% (median +19.8%, 6 runs).",
+      "k=10, permutation subsets (selection-contaminated): relative RMSE change +0.9% to +9.5% (median +3.0%, 6 runs).",
+      "k=10, random subsets: relative RMSE change -1.3% to +14.9% (median +6.0%, 30 runs).",
+      "k=7, correlation subsets (training data only): relative RMSE change +14.1% to +33.9% (median +28.0%, 6 runs).",
+      "k=7, permutation subsets (selection-contaminated): relative RMSE change +1.2% to +11.0% (median +9.3%, 6 runs).",
+      "k=7, random subsets: relative RMSE change +0.8% to +22.2% (median +12.3%, 30 runs).",
+      "k=4, correlation subsets (training data only): relative RMSE change +19.3% to +42.6% (median +38.2%, 6 runs).",
+      "k=4, permutation subsets (selection-contaminated): relative RMSE change +12.2% to +22.6% (median +18.8%, 6 runs).",
+      "k=4, random subsets: relative RMSE change +12.1% to +41.3% (median +27.7%, 30 runs).",
+      "k=2, correlation subsets (training data only): relative RMSE change +33.1% to +57.9% (median +53.4%, 6 runs).",
+      "k=2, permutation subsets (selection-contaminated): relative RMSE change +21.3% to +45.1% (median +36.3%, 6 runs).",
+      "k=2, random subsets: relative RMSE change +27.5% to +65.7% (median +48.3%, 30 runs)."
+    ],
+    "ranked_versus_random": [
+      "correlation: lower RMSE than the random-control mean in 2 of 24 model-budget pairs and lower than all five draws in 0; per-engine tests after Holm correction: 0 significantly lower, 0 significantly higher, of 24.",
+      "permutation: lower RMSE than the random-control mean in 24 of 24 model-budget pairs and lower than all five draws in 13; per-engine tests after Holm correction: 0 significantly lower, 0 significantly higher, of 24."
+    ],
+    "architecture_robustness": [
+      "Mean relative increase over the ranked subsets and budgets, smallest first: tcn +13.9%, lstm +21.9%, gru +25.4%, random_forest +26.2%, gradient_boosting +28.2%, transformer +29.9%.",
+      "Lowest absolute RMSE at k=2: random_forest (permutation) 17.021. Relative robustness and absolute accuracy are different criteria."
+    ],
+    "performance_latency_sensor_cost": [
+      "8 conditions are Pareto-efficient in (RMSE, latency): gru k=2 random 104 (RMSE 19.822, 3.02 ms); gru k=4 random 105 (RMSE 15.930, 3.02 ms); gru k=7 random 104 (RMSE 14.520, 3.03 ms); gru k=7 random 103 (RMSE 14.456, 3.03 ms); gru k=7 random 102 (RMSE 13.353, 3.03 ms); gru k=10 permutation (RMSE 12.557, 3.08 ms); gru k=14 full (RMSE 12.440, 3.09 ms); transformer k=14 full (RMSE 12.321, 8.64 ms)."
+    ],
+    "smaller_sensor_sets": [
+      "random_forest (correlation): smallest budget within 5% of its full-sensor RMSE: none.",
+      "random_forest (permutation, selection-contaminated): smallest budget within 5% of its full-sensor RMSE: 10.",
+      "random_forest (mean of the random draws): smallest budget within 5% of its full-sensor RMSE: 10.",
+      "gradient_boosting (correlation): smallest budget within 5% of its full-sensor RMSE: none.",
+      "gradient_boosting (permutation, selection-contaminated): smallest budget within 5% of its full-sensor RMSE: 10.",
+      "gradient_boosting (mean of the random draws): smallest budget within 5% of its full-sensor RMSE: 10.",
+      "lstm (correlation): smallest budget within 5% of its full-sensor RMSE: none.",
+      "lstm (permutation, selection-contaminated): smallest budget within 5% of its full-sensor RMSE: none.",
+      "lstm (mean of the random draws): smallest budget within 5% of its full-sensor RMSE: none.",
+      "gru (correlation): smallest budget within 5% of its full-sensor RMSE: none.",
+      "gru (permutation, selection-contaminated): smallest budget within 5% of its full-sensor RMSE: 10.",
+      "gru (mean of the random draws): smallest budget within 5% of its full-sensor RMSE: none.",
+      "tcn (correlation): smallest budget within 5% of its full-sensor RMSE: none.",
+      "tcn (permutation, selection-contaminated): smallest budget within 5% of its full-sensor RMSE: 7.",
+      "tcn (mean of the random draws): smallest budget within 5% of its full-sensor RMSE: 10.",
+      "transformer (correlation): smallest budget within 5% of its full-sensor RMSE: none.",
+      "transformer (permutation, selection-contaminated): smallest budget within 5% of its full-sensor RMSE: none.",
+      "transformer (mean of the random draws): smallest budget within 5% of its full-sensor RMSE: none."
+    ]
+  },
+  "evidence": {
+    "observed_validation_results": [
+      "Error was higher at smaller budgets overall; it rose at every step in 17 of 18 model-strategy sequences (full set first).",
+      "Within the 5% tolerance fixed in the config, the mean of the random draws: random_forest at k=10, gradient_boosting at k=10, tcn at k=10. Informed selection is therefore not shown to be necessary there.",
+      "Within the tolerance, correlation subsets: no model."
+    ],
+    "selection_contaminated": [
+      "Permutation subsets had lower RMSE than the random mean in 24 of 24 model-budget pairs. The pairs share engines and subsets, so they are not independent confirmations.",
+      "Permutation subsets had lower RMSE than correlation subsets in 24 of 24 pairs. The two methods also differ in kind (univariate last-value correlation against importance in one fitted multivariate model), not only in the data they used.",
+      "Within the tolerance, permutation subsets: random_forest at k=10, gradient_boosting at k=10, gru at k=10, tcn at k=7."
+    ],
+    "statistical_20_engines": [
+      "Reduced against full set, correlation: 19 of 24 significant after Holm correction.",
+      "Reduced against full set, permutation: 9 of 24 significant after Holm correction (the test does not account for selection on these engines).",
+      "Ranked against the random mean, correlation: 0 of 24 significant after Holm correction.",
+      "Ranked against the random mean, permutation: 0 of 24 significant after Holm correction (the test does not account for selection on these engines).",
+      "A non-significant difference is not equivalence: among the non-significant comparisons with the full set, the upper 95% limit of the median per-engine RMSE increase reaches +5.9 cycles.",
+      "These statements describe 20 validation engines and one training seed."
+    ],
+    "exploratory_post_hoc": [
+      "The permutation-against-correlation counts, the practical reading of the Pareto front and the latency repeatability figures were examined after the results were seen. No hypothesis test supports them.",
+      "The hypotheses in section 1 and the choice of Pareto objectives have no timestamped record before training; the tolerance, test families, correction and bootstrap settings are in the config logged with every run."
+    ],
+    "pareto_numerical_vs_practical": [
+      "Numerical: 8 conditions are non-dominated in (RMSE, latency).",
+      "Practical (post-hoc reading: lowest-RMSE efficient condition per model, because latency differences within a model are not interpretable): gru k=14 full (12.440 cycles, 3.1 ms); transformer k=14 full (12.321 cycles, 8.6 ms)."
+    ]
+  }
+}

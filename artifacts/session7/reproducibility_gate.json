@@ -1,0 +1,83 @@
+{
+  "checks": [
+    {
+      "model": "random_forest",
+      "experiment_id": "s7_random_forest_k14_full_b0bdfcbc16",
+      "sensors_ok": true,
+      "rmse": 12.95051830929376,
+      "canonical_rmse": 12.95051830929376,
+      "rmse_difference": 0.0,
+      "predictions_identical": true,
+      "weights_identical": null,
+      "n_parameters": 117656,
+      "canonical_n_parameters": 117656,
+      "passed": true
+    },
+    {
+      "model": "gradient_boosting",
+      "experiment_id": "s7_gradient_boosting_k14_full_718c8a6dc8",
+      "sensors_ok": true,
+      "rmse": 12.791487775815147,
+      "canonical_rmse": 12.791487775815147,
+      "rmse_difference": 0.0,
+      "predictions_identical": true,
+      "weights_identical": null,
+      "n_parameters": 12196,
+      "canonical_n_parameters": 12196,
+      "passed": true
+    },
+    {
+      "model": "lstm",
+      "experiment_id": "s7_lstm_k14_full_7f84482e29",
+      "sensors_ok": true,
+      "rmse": 12.990028477338315,
+      "canonical_rmse": 12.990028477338315,
+      "rmse_difference": 0.0,
+      "predictions_identical": true,
+      "weights_identical": true,
+      "n_parameters": 14625,
+      "canonical_n_parameters": 14625,
+      "passed": true
+    },
+    {
+      "model": "gru",
+      "experiment_id": "s7_gru_k14_full_19b42c55b3",
+      "sensors_ok": true,
+      "rmse": 12.44037829811757,
+      "canonical_rmse": 12.44037829811757,
+      "rmse_difference": 0.0,
+      "predictions_identical": true,
+      "weights_identical": true,
+      "n_parameters": 15425,
+      "canonical_n_parameters": 15425,
+      "passed": true
+    },
+    {
+      "model": "tcn",
+      "experiment_id": "s7_tcn_k14_full_e1cb4eb4ce",
+      "sensors_ok": true,
+      "rmse": 14.636878792816178,
+      "canonical_rmse": 14.636878792816178,
+      "rmse_difference": 0.0,
+      "predictions_identical": true,
+      "weights_identical": true,
+      "n_parameters": 23617,
+      "canonical_n_parameters": 23617,
+      "passed": true
+    },
+    {
+      "model": "transformer",
+      "experiment_id": "s7_transformer_k14_full_0fe6834130",
+      "sensors_ok": true,
+      "rmse": 12.320710742477193,
+      "canonical_rmse": 12.320710742477193,
+      "rmse_difference": 0.0,
+      "predictions_identical": true,
+      "weights_identical": true,
+      "n_parameters": 68097,
+      "canonical_n_parameters": 68097,
+      "passed": true
+    }
+  ],
+  "passed": true
+}

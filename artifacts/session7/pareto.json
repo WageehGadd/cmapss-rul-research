@@ -1,0 +1,30 @@
+{
+  "dominance": "<= in all objectives and < in at least one; all minimised",
+  "rmse_latency": [
+    "s7_gru_k14_full_19b42c55b3",
+    "s7_transformer_k14_full_0fe6834130",
+    "s7_gru_k10_permutation_7bdf29c742",
+    "s7_gru_k07_random102_a468bad2ae",
+    "s7_gru_k07_random103_e26b8947ac",
+    "s7_gru_k07_random104_f18421ab6f",
+    "s7_gru_k04_random105_5789c7e124",
+    "s7_gru_k02_random104_b4063db7e7"
+  ],
+  "rmse_latency_sensors": [
+    "s7_gru_k14_full_19b42c55b3",
+    "s7_transformer_k14_full_0fe6834130",
+    "s7_random_forest_k04_permutation_19e815111e",
+    "s7_random_forest_k02_permutation_21e6c32834",
+    "s7_gradient_boosting_k04_permutation_b4429d6fc3",
+    "s7_gru_k10_permutation_7bdf29c742",
+    "s7_gru_k04_permutation_4007c054dd",
+    "s7_gru_k02_permutation_6243876093",
+    "s7_gru_k07_random102_a468bad2ae",
+    "s7_gru_k07_random103_e26b8947ac",
+    "s7_gru_k07_random104_f18421ab6f",
+    "s7_gru_k04_random105_5789c7e124",
+    "s7_gru_k02_random102_2ffae4c04e",
+    "s7_gru_k02_random104_b4063db7e7",
+    "s7_transformer_k07_random102_8b256e109a"
+  ]
+}
